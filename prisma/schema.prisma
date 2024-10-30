@@ -12,3 +12,166 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Employee {
+  id                   Int            @id @default(autoincrement())
+  googleId             String?        @unique @map("google_id")
+  email                String         @unique
+  password             String?
+  active               Boolean        @default(true)
+  name                 String
+  phone                String         @unique
+  employeeRole         EmployeesRole? @map("employee_role")
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  announcements        Announcement[]
+  courses              Course[]
+}
+
+enum EmployeesRole {
+  TEACHER
+  ADMIN
+}
+
+model Student {
+  id                   Int          @id @default(autoincrement())
+  studentId            String       @unique
+  name                 String
+  phone                String       @unique
+  dateOfBirth          DateTime
+  address              String
+  admitDate            DateTime
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  majorId              Int
+  major                Major        @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  payments             Payment[]
+  grades               Grade[]
+  enrollments          Enrollment[]
+}
+
+model Course {
+  id               Int             @id @default(autoincrement())
+  courseCode       Int             @unique @map("course_code")
+  courseName       String          @map("course_name")
+  credits          Int
+  section          Int
+  teacherId        Int?
+  teacher          Employee?       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  courseSyllabusId Int
+  courseSyllabus   CourseSyllabus  @relation(fields: [courseSyllabusId], references: [id], onDelete: Cascade)
+  majorId          Int
+  major            Major           @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  classSchedules   ClassSchedule[]
+  enrollments      Enrollment[]
+  grades           Grade[]
+  announcements    Announcement[]
+  prerequisiteId   Int?
+  prerequisite     Course?         @relation("Prerequisite", fields: [prerequisiteId], references: [id])
+  nextCourses      Course[]        @relation("Prerequisite")
+}
+
+model ClassSchedule {
+  id        Int    @id @default(autoincrement())
+  day       String
+  startTime String
+  endTime   String
+  room      String
+  courseId  Int
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Enrollment {
+  id               Int              @id @default(autoincrement())
+  status           EnrollmentStatus @default(PENDING)
+  registrationDate DateTime         @default(now())
+  studentId        Int
+  student          Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId         Int
+  course           Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+enum EnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Payment {
+  id          Int           @id @default(autoincrement())
+  totalCredit Int           @map("total_credit")
+  amount      Float
+  status      PayMentStatus
+  studentId   Int           @map("student_id")
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  payDate     DateTime      @default(now()) @map("pay_date")
+}
+
+enum PayMentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Grade {
+  id         Int              @id @default(autoincrement())
+  totalPoint Int              @map("total_point")
+  semester   String
+  studentId  Int              @map("student_id")
+  student    Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId   Int              @map("course_id")
+  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  components GradeComponent[]
+}
+
+model GradeComponent {
+  id      Int    @id @default(autoincrement())
+  type    String
+  point   Int
+  gradeId Int    @map("grade_id")
+  grade   Grade  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  courseId  Int      @map("course_id")
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacherId Int      @map("teacher_id")
+  teacher   Employee @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+}
+
+model Faculty {
+  id     Int     @id @default(autoincrement())
+  name   String
+  majors Major[]
+}
+
+model Major {
+  id                   Int              @id @default(autoincrement())
+  name                 String
+  facultyId            Int
+  faculty              Faculty          @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  courses              Course[]
+  Students             Student[]
+  CourseRecommendation CourseSyllabus[]
+}
+
+model CourseSyllabus {
+  id                 Int                @id @default(autoincrement())
+  year               Int
+  recommendationType RecommendationType
+  majorId            Int
+  major              Major              @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  Course             Course[]
+
+  @@unique([majorId, year])
+}
+
+enum RecommendationType {
+  REQUIRED
+  ELECTIVE
+}
