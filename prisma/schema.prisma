@@ -81,6 +81,7 @@ model Course {
   courseCode           Int                    @unique @map("course_code")
   courseName           String                 @map("course_name")
   credits              Int
+  seat                 Int
   section              Int
   status               Boolean                @default(true)
   teacherId            Int?
