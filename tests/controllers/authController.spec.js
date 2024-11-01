@@ -47,13 +47,13 @@ describe('Auth Controller', () => {
                 firstName: 'John',
                 lastName: 'Doe',
                 email: 'john@example.com',
-                password: 'wrongpassword', // password is wrong here
+                password: 'wrongpassword',
                 employeeRole: 'EMPLOYEE',
                 phone: '1234567890',
             };
 
             require('../../src/services/authServices').findEmployee.mockResolvedValue(mockEmployee.email);
-            require('../../src/services/hashServices').compare.mockResolvedValue(false); // change this to false
+            require('../../src/services/hashServices').compare.mockResolvedValue(false); 
             require('../../src/services/jwtServices').sign.mockReturnValue('mockedToken');
 
             const response = await request(app)

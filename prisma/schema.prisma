@@ -30,6 +30,8 @@ model Employee {
   Student              Student[]
   SectionChangeRequest SectionChangeRequest[]
   InfoChangeRequest    InfoChangeRequest[]
+  majorId              Int?
+  major                Major?                 @relation(fields: [majorId], references: [id], onDelete: Cascade)
 }
 
 enum EmployeesRole {
@@ -60,6 +62,7 @@ model Student {
   grades               Grade[]
   enrollments          Enrollment[]
   SectionChangeRequest SectionChangeRequest[]
+  InfoChangeRequest    InfoChangeRequest[]
 }
 
 enum StudentGender {
@@ -193,6 +196,7 @@ model Major {
   Students             Student[]
   CourseRecommendation CourseSyllabus[]
   ConditionCourse      ConditionCourse[]
+  Employee             Employee[]
 }
 
 model CourseSyllabus {
@@ -235,14 +239,10 @@ model InfoChangeRequest {
   id            Int           @id @default(autoincrement())
   requestedAt   DateTime      @default(now())
   status        RequestStatus @default(PENDING)
-  userId        Int
-  user          Employee      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userType      UserType
+  studentId     Int?
+  student       Student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   fieldToChange String
   newValue      String
-}
-
-enum UserType {
-  TEACHER
-  STUDENT
+  employeeId    Int?
+  employee      Employee?     @relation(fields: [employeeId], references: [id])
 }

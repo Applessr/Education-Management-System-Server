@@ -126,7 +126,7 @@ adminController.getAllStudent = async (req, res, next) => {
         next(error);
     }
 };
-adminController.getAllEmployee= async (req, res, next) => {
+adminController.getAllEmployee = async (req, res, next) => {
     try {
         const userId = req.user.id
         if (!userId) {
@@ -147,16 +147,16 @@ adminController.getAllEmployee= async (req, res, next) => {
         next(error);
     }
 };
-adminController.getStudentById= async (req, res, next) => {
+adminController.getStudentById = async (req, res, next) => {
     try {
         const userId = req.user.id
         if (!userId) {
             return createError(400, 'Check token expired date')
         }
-        const {studentId} = req.params
-        console.log(req.params)
-        if(!studentId) {
-            return createError(400,'Student ID is require')
+        const { studentId } = req.params
+
+        if (!studentId) {
+            return createError(400, 'Student ID is require')
         }
 
         const { employeeRole } = req.user
@@ -167,6 +167,78 @@ adminController.getStudentById= async (req, res, next) => {
         const getStudent = await studentServices.getStudentProfile(studentId);
 
         res.status(200).json(getStudent);
+
+    } catch (error) {
+        console.log('Error from getAllStudent', error)
+        next(error);
+    }
+};
+adminController.getEmployeeById = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+        const { employeeId } = req.params
+
+        if (!employeeId) {
+            return createError(400, 'Student ID is require')
+        }
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const getEmployee = await adminServices.getEmployeeById(employeeId);
+
+        res.status(200).json(getEmployee);
+
+    } catch (error) {
+        console.log('Error from getAllStudent', error)
+        next(error);
+    }
+}
+adminController.getRequestInfo = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+     
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const allRequest = await adminServices.getRequestInfo();
+
+        res.status(200).json(allRequest);
+
+    } catch (error) {
+        console.log('Error from getAllStudent', error)
+        next(error);
+    }
+}
+adminController.getRequestInfoById = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+        const { requestId } = req.params
+        if (!requestId) {
+            return createError(400, 'requestId is require')
+        }
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const request = await adminServices.getRequestInfoById(requestId);
+
+        res.status(200).json(request);
 
     } catch (error) {
         console.log('Error from getAllStudent', error)
