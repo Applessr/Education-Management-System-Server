@@ -30,6 +30,8 @@ model Employee {
   Student              Student[]
   SectionChangeRequest SectionChangeRequest[]
   InfoChangeRequest    InfoChangeRequest[]
+  majorId              Int?
+  major                Major?                 @relation(fields: [majorId], references: [id], onDelete: Cascade)
 }
 
 enum EmployeesRole {
@@ -194,6 +196,7 @@ model Major {
   Students             Student[]
   CourseRecommendation CourseSyllabus[]
   ConditionCourse      ConditionCourse[]
+  Employee             Employee[]
 }
 
 model CourseSyllabus {
