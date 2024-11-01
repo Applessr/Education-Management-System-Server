@@ -14,18 +14,22 @@ datasource db {
 }
 
 model Employee {
-  id                   Int            @id @default(autoincrement())
-  googleId             String?        @unique @map("google_id")
-  email                String         @unique
+  id                   Int                    @id @default(autoincrement())
+  googleId             String?                @unique @map("google_id")
+  email                String                 @unique
   password             String?
-  active               Boolean        @default(true)
-  name                 String
-  phone                String         @unique
-  employeeRole         EmployeesRole? @map("employee_role")
+  active               Boolean                @default(true)
+  firstName            String                 @map("first_name")
+  lastName             String                 @map("last_name")
+  phone                String?                @unique
+  employeeRole         EmployeesRole?         @default(TEACHER) @map("employee_role")
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
   announcements        Announcement[]
   courses              Course[]
+  Student              Student[]
+  SectionChangeRequest SectionChangeRequest[]
+  InfoChangeRequest    InfoChangeRequest[]
 }
 
 enum EmployeesRole {
@@ -34,41 +38,70 @@ enum EmployeesRole {
 }
 
 model Student {
-  id                   Int          @id @default(autoincrement())
-  studentId            String       @unique
-  name                 String
-  phone                String       @unique
-  dateOfBirth          DateTime
-  address              String
+  id                   Int                    @id @default(autoincrement())
+  studentId            String                 @unique
+  email                String                 @unique
+  password             String
+  firstName            String
+  lastName             String
+  phone                String                 @unique
+  dateOfBirth          DateTime?
+  address              String?
+  gender               StudentGender
   admitDate            DateTime
+  status               StudentStatus          @default(ACTIVE)
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
+  adviserId            Int?
+  adviser              Employee?              @relation(fields: [adviserId], references: [id], onDelete: Cascade)
   majorId              Int
-  major                Major        @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  major                Major                  @relation(fields: [majorId], references: [id], onDelete: Cascade)
   payments             Payment[]
   grades               Grade[]
   enrollments          Enrollment[]
+  SectionChangeRequest SectionChangeRequest[]
+}
+
+enum StudentGender {
+  MALE
+  FEMALE
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
 }
 
 model Course {
-  id               Int             @id @default(autoincrement())
-  courseCode       Int             @unique @map("course_code")
-  courseName       String          @map("course_name")
-  credits          Int
-  section          Int
-  teacherId        Int?
-  teacher          Employee?       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  courseSyllabusId Int
-  courseSyllabus   CourseSyllabus  @relation(fields: [courseSyllabusId], references: [id], onDelete: Cascade)
-  majorId          Int
-  major            Major           @relation(fields: [majorId], references: [id], onDelete: Cascade)
-  classSchedules   ClassSchedule[]
-  enrollments      Enrollment[]
-  grades           Grade[]
-  announcements    Announcement[]
-  prerequisiteId   Int?
-  prerequisite     Course?         @relation("Prerequisite", fields: [prerequisiteId], references: [id])
-  nextCourses      Course[]        @relation("Prerequisite")
+  id                   Int                    @id @default(autoincrement())
+  courseCode           Int                    @unique @map("course_code")
+  courseName           String                 @map("course_name")
+  credits              Int
+  section              Int
+  status               Boolean                @default(true)
+  teacherId            Int?
+  teacher              Employee?              @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  courseSyllabusId     Int
+  courseSyllabus       CourseSyllabus         @relation(fields: [courseSyllabusId], references: [id], onDelete: Cascade)
+  majorId              Int
+  major                Major                  @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  classSchedules       ClassSchedule[]
+  enrollments          Enrollment[]
+  grades               Grade[]
+  announcements        Announcement[]
+  ConditionCourse      ConditionCourse[]
+  SectionChangeRequest SectionChangeRequest[]
+}
+
+model ConditionCourse {
+  id        Int     @id @default(autoincrement())
+  courseId  Int
+  courses   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  facultyId Int
+  faculty   Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  majorId   Int
+  major     Major   @relation(fields: [majorId], references: [id], onDelete: Cascade)
 }
 
 model ClassSchedule {
@@ -102,7 +135,7 @@ model Payment {
   id          Int           @id @default(autoincrement())
   totalCredit Int           @map("total_credit")
   amount      Float
-  status      PayMentStatus
+  status      PayMentStatus @default(PENDING)
   studentId   Int           @map("student_id")
   student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
   payDate     DateTime      @default(now()) @map("pay_date")
@@ -145,25 +178,27 @@ model Announcement {
 }
 
 model Faculty {
-  id     Int     @id @default(autoincrement())
-  name   String
-  majors Major[]
+  id              Int               @id @default(autoincrement())
+  name            String
+  majors          Major[]
+  ConditionCourse ConditionCourse[]
 }
 
 model Major {
-  id                   Int              @id @default(autoincrement())
+  id                   Int               @id @default(autoincrement())
   name                 String
   facultyId            Int
-  faculty              Faculty          @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  faculty              Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
   courses              Course[]
   Students             Student[]
   CourseRecommendation CourseSyllabus[]
+  ConditionCourse      ConditionCourse[]
 }
 
 model CourseSyllabus {
   id                 Int                @id @default(autoincrement())
   year               Int
-  recommendationType RecommendationType
+  recommendationType RecommendationType @default(REQUIRED)
   majorId            Int
   major              Major              @relation(fields: [majorId], references: [id], onDelete: Cascade)
   Course             Course[]
@@ -174,4 +209,40 @@ model CourseSyllabus {
 enum RecommendationType {
   REQUIRED
   ELECTIVE
+}
+
+model SectionChangeRequest {
+  id             Int           @id @default(autoincrement())
+  requestedAt    DateTime      @default(now())
+  status         RequestStatus @default(PENDING)
+  studentId      Int
+  student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId       Int
+  course         Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  currentSection Int
+  newSection     Int
+  teacherId      Int
+  teacher        Employee      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model InfoChangeRequest {
+  id            Int           @id @default(autoincrement())
+  requestedAt   DateTime      @default(now())
+  status        RequestStatus @default(PENDING)
+  userId        Int
+  user          Employee      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userType      UserType
+  fieldToChange String
+  newValue      String
+}
+
+enum UserType {
+  TEACHER
+  STUDENT
 }

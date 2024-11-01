@@ -1,9 +1,16 @@
 const express = require('express');
 const authController = require('../controllers/authController');
+const { loginEmployeeValidator, loginStudentValidator } = require('../middlewares/validator');
 
-const router = express.Router()
+const authRouter = express.Router()
 
-router.post('/login', authController.login)
+authRouter.post('/login-employee', loginEmployeeValidator, authController.loginEmployee);
+authRouter.post('/login-student', loginStudentValidator, authController.loginStudent);
 
+authRouter.post('/login-google', authController.loginGoogle);
 
-module.exports = router;
+authRouter.post('/forget-password', authController.forgetPassword);
+
+authRouter.post('/reset-password', authController.resetPassword);
+
+module.exports = authRouter;
