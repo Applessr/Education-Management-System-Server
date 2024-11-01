@@ -152,14 +152,16 @@ enum PayMentStatus {
 }
 
 model Grade {
-  id         Int              @id @default(autoincrement())
-  totalPoint Int              @map("total_point")
-  semester   String
-  studentId  Int              @map("student_id")
-  student    Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  courseId   Int              @map("course_id")
-  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  components GradeComponent[]
+  id          Int              @id @default(autoincrement())
+  totalPoint  Int              @map("total_point")
+  semester    String
+  studentId   Int              @map("student_id")
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId    Int              @map("course_id")
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  components  GradeComponent[]
+  letterGrade String?
+  credit      Int
 }
 
 model GradeComponent {
