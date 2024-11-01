@@ -73,4 +73,67 @@ adminModels.getAllStudent = async () => {
 adminModels.getAllEmployee = async () => {
     return await prisma.employee.findMany({});
 };
+adminModels.getRequestInfo = async () => {
+    return await prisma.infoChangeRequest.findMany({
+        include: {
+            student: {
+                select: {
+                    firstName: true,
+                    lastName: true,
+                    major: {
+                        select: {
+                            name: true,
+                            faculty: {
+                                select: {
+                                    name: true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            employee: {
+                select: {
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    employeeRole: true
+                }
+            }
+        }
+    });
+};
+adminModels.getRequestInfoById = async (requestId) => {
+    return await prisma.infoChangeRequest.findUnique({
+        where: {
+            id: Number(requestId)
+        }, include: {
+            student: {
+                select: {
+                    firstName: true,
+                    lastName: true,
+                    major: {
+                        select: {
+                            name: true,
+                            faculty: {
+                                select: {
+                                    name: true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            employee: {
+                select: {
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    employeeRole: true
+                }
+            }
+        }
+    });
+};
+
 module.exports = adminModels;

@@ -33,6 +33,12 @@ adminServices.getAllStudent = async () => {
 adminServices.getAllEmployee = async () => {
     return await adminModels.getAllEmployee()
 };
+adminServices.getRequestInfo = async () => {
+    return await adminModels.getRequestInfo()
+};
+adminServices.getRequestInfoById = async (requestId) => {
+    return await adminModels.getRequestInfoById(requestId)
+};
 
 module.exports = adminServices;
 
