@@ -39,6 +39,9 @@ adminServices.getRequestInfo = async () => {
 adminServices.getRequestInfoById = async (requestId) => {
     return await adminModels.getRequestInfoById(requestId)
 };
+adminServices.changeStudentStatus = async (studentId, status) => {
+    return await adminModels.changeStudentStatus(studentId, status)
+};
 
 module.exports = adminServices;
 

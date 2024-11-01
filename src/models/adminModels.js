@@ -135,5 +135,10 @@ adminModels.getRequestInfoById = async (requestId) => {
         }
     });
 };
+adminModels.changeStudentStatus = async (studentId, status) => {
+    return await prisma.student.update({
+        
+    });
+};
 
 module.exports = adminModels;
