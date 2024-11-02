@@ -19,13 +19,13 @@ app.use('/auth', authRouter)
 
 app.use('/student', authenticate, studentRouter)
 
-app.use('/teacher', teacherRouter)
+app.use('/teacher', authenticate, teacherRouter)
 
 app.use('/admin', authenticate, adminRouter)
 
 app.use('/course', courseRouter)
 
-app.use('/grade', gradeRouter)
+app.use('/grade', authenticate, gradeRouter)
 
 
 app.use('*', notFoundHandler);

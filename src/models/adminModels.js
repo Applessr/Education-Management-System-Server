@@ -32,7 +32,14 @@ adminModels.createEmployee = async (data) => {
 adminModels.findStudentId = async (studentId) => {
     return await prisma.student.findUnique({
         where: {
-            studentId: studentId
+            id: studentId
+        }
+    })
+};
+adminModels.findStudentCode = async (studentCode) => {
+    return await prisma.student.findUnique({
+        where: {
+            studentId: studentCode
         }
     })
 };
@@ -137,7 +144,57 @@ adminModels.getRequestInfoById = async (requestId) => {
 };
 adminModels.changeStudentStatus = async (studentId, status) => {
     return await prisma.student.update({
-        
+        where: {
+            id: studentId,
+        },
+        data: {
+            status: status
+        }
+    });
+};
+adminModels.changeStudentInfo = async (studentId, updatedData) => {
+    return await prisma.student.update({
+        where: {
+            id: Number(studentId)
+        },
+        data: {
+            firstName: updatedData.firstName,
+            lastName: updatedData.lastName,
+            phone: updatedData.phone,
+            address: updatedData.address,
+        },
+    });
+};
+adminModels.changeEmployeeInfo = async (employeeId, updatedData) => {
+    return await prisma.employee.update({
+        where: {
+            id: Number(employeeId)
+        },
+        data: {
+            firstName: updatedData.firstName,
+            lastName: updatedData.lastName,
+            phone: updatedData.phone
+        },
+    });
+};
+adminModels.inactiveEmployee = async (employeeId) => {
+    return await prisma.employee.update({
+        where: {
+            id: employeeId,
+        },
+        data: {
+            active: false
+        }
+    });
+};
+adminModels.activeEmployee = async (employeeId) => {
+    return await prisma.employee.update({
+        where: {
+            id: employeeId,
+        },
+        data: {
+            active: true
+        }
     });
 };
 

@@ -9,7 +9,7 @@ const adminController = {};
 
 adminController.registerEmployee = async (req, res, next) => {
     try {
-        const { email, password, firstName, lastName, phone } = req.body;
+        const { email, password, firstName, lastName, phone, majorId } = req.body;
         if (!(email && password && firstName && lastName && phone)) {
             return createError(400, 'All field is require')
         }
@@ -31,7 +31,7 @@ adminController.registerEmployee = async (req, res, next) => {
 
         const hashPassword = await hashServices.hash(password);
 
-        const result = await adminServices.createEmployee({ email, password: hashPassword, firstName, lastName, phone })
+        const result = await adminServices.createEmployee({ email, password: hashPassword, firstName, lastName, phone, majorId })
 
         console.log(result)
         res.status(201).json({ email, firstName, lastName, phone })
@@ -53,7 +53,7 @@ adminController.registerStudent = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
 
-        const isStudentIdExist = await adminServices.getStudentId(studentId);
+        const isStudentIdExist = await adminServices.findStudentCode(studentId);
         if (isStudentIdExist) {
             return createError(400, 'This studentId is already exist')
         }
@@ -143,7 +143,7 @@ adminController.getAllEmployee = async (req, res, next) => {
         res.status(200).json(getAllEmployee);
 
     } catch (error) {
-        console.log('Error from getAllStudent', error)
+        console.log('Error from getAllEmployee', error)
         next(error);
     }
 };
@@ -169,7 +169,7 @@ adminController.getStudentById = async (req, res, next) => {
         res.status(200).json(getStudent);
 
     } catch (error) {
-        console.log('Error from getAllStudent', error)
+        console.log('Error from getStudentById', error)
         next(error);
     }
 };
@@ -195,7 +195,7 @@ adminController.getEmployeeById = async (req, res, next) => {
         res.status(200).json(getEmployee);
 
     } catch (error) {
-        console.log('Error from getAllStudent', error)
+        console.log('Error from getEmployeeById', error)
         next(error);
     }
 };
@@ -212,7 +212,7 @@ adminController.getRequestInfo = async (req, res, next) => {
         res.status(200).json(allRequest);
 
     } catch (error) {
-        console.log('Error from getAllStudent', error)
+        console.log('Error from getRequestInfo', error)
         next(error);
     }
 };
@@ -234,7 +234,7 @@ adminController.getRequestInfoById = async (req, res, next) => {
         res.status(200).json(request);
 
     } catch (error) {
-        console.log('Error from getAllStudent', error)
+        console.log('Error from getRequestInfoById', error)
         next(error);
     }
 };
@@ -245,12 +245,156 @@ adminController.changeStudentStatus = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
 
-        const request = await adminServices.getRequestInfoById(requestId);
+        const { studentId, status } = req.body
+        if (!studentId && status) {
+            return createError(400, 'All field is require')
+        }
 
-        res.status(200).json(request);
+        const changeStatus = await adminServices.changeStudentStatus(studentId, status)
+
+        res.status(200).json({ message: `student status change to ${status}` });
 
     } catch (error) {
-        console.log('Error from getAllStudent', error)
+        console.log('Error from changeStudentStatus', error)
+        next(error);
+    }
+};
+adminController.changeStudentInfo = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { studentId, firstName, lastName, phone, address } = req.body
+        if (!studentId) {
+            return createError(400, 'All field is require')
+        }
+        console.log(studentId)
+
+        const student = await adminServices.getStudentId(studentId);
+        if (!student) {
+            return next(createError(404, 'Student not found'));
+        }
+
+        if (!(firstName || lastName || phone || address)) {
+            return createError(400, 'At least one field is require change')
+        }
+
+        const updatedData = {};
+        if (firstName) {
+            updatedData.firstName = firstName;
+        }
+        if (lastName) {
+            updatedData.lastName = lastName;
+        }
+        if (phone) {
+            updatedData.phone = phone;
+        }
+        if (address) {
+            updatedData.address = address;
+        }
+        const updatedStudent = await adminServices.changeStudentInfo(studentId, updatedData);
+
+        res.status(200).json(updatedData);
+
+    } catch (error) {
+        console.log('Error from changeStudentInfo', error)
+        next(error);
+    }
+};
+adminController.changeEmployeeInfo = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { employeeId, firstName, lastName, phone } = req.body
+        if (!employeeId) {
+            return createError(400, 'Employee ID is require')
+        }
+        console.log(employeeId)
+
+        const employee = await adminServices.getEmployeeById(employeeId);
+        if (!employee) {
+            return next(createError(404, 'employee not found'));
+        }
+
+        if (!(firstName || lastName || phone)) {
+            return createError(400, 'At least one field is require change')
+        }
+
+        const updatedData = {};
+        if (firstName) {
+            updatedData.firstName = firstName;
+        }
+        if (lastName) {
+            updatedData.lastName = lastName;
+        }
+        if (phone) {
+            updatedData.phone = phone;
+        }
+
+        const updatedEmployee = await adminServices.changeEmployeeInfo(employeeId, updatedData);
+
+        res.status(200).json(updatedData);
+
+    } catch (error) {
+        console.log('Error from changeStudentInfo', error)
+        next(error);
+    }
+};
+
+adminController.inactiveEmployee = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { employeeId } = req.body
+        if (!employeeId) {
+            return createError(400, 'All field is require')
+        }
+        const employee = await adminServices.getEmployeeById(employeeId);
+        console.log(employee)
+        if (employee.active === false || employee.active === "false") {
+            return createError(400, 'this account is already inactive')
+        }
+
+        const inactive = await adminServices.inactiveEmployee(employeeId)
+
+        res.status(200).json({ message: `Employee Inactive account successful` });
+
+    } catch (error) {
+        console.log('Error from inactiveEmployee', error)
+        next(error);
+    }
+};
+adminController.activeEmployee = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { employeeId } = req.body
+        if (!employeeId) {
+            return createError(400, 'All field is require')
+        }
+        const employee = await adminServices.getEmployeeById(employeeId);
+        console.log(employee)
+        if (employee.active === true || employee.active === "true") {
+            return createError(400, 'this account is already active')
+        }
+
+        const inactive = await adminServices.activeEmployee(employeeId)
+
+        res.status(200).json({ message: `Employee active account successful` });
+
+    } catch (error) {
+        console.log('Error from inactiveEmployee', error)
         next(error);
     }
 };

@@ -23,6 +23,21 @@ studentController.getProfile = async (req, res, next) => {
     }
 
 };
+studentController.getNotification = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+        const notification = await studentServices.getNotification(userId);
+      
+        res.status(200).json(notification);
+    } catch (error) {
+        console.log('Error from student getProfile', error)
+        next(error);
+    }
+
+};
 studentController.studentChangePassword = async (req, res, next) => {
     try {
         const userId = req.user.id
@@ -64,7 +79,28 @@ studentController.studentChangePassword = async (req, res, next) => {
         console.log('Error from student change password', error)
         next(error);
     }
+};
+studentController.sendRequestChange = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { fieldToChange, newValue } = req.body
+        if (!(fieldToChange && newValue)) {
+            return createError('All field is require')
+        }
+
+        const request = await studentServices.sendRequestChange(userId, fieldToChange, newValue)
+        res.status(201).json(request);
+    } catch (error) {
+        console.log('Error from sendRequestChange', error)
+        next(error);
+    }
+
 }
+
 
 
 
