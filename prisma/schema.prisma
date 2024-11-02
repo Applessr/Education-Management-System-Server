@@ -78,7 +78,7 @@ enum StudentStatus {
 
 model Course {
   id                   Int                    @id @default(autoincrement())
-  courseCode           Int                    @unique @map("course_code")
+  courseCode           Int                    @map("course_code")
   courseName           String                 @map("course_name")
   credits              Int
   seat                 Int
@@ -97,6 +97,8 @@ model Course {
   conditionCourse      ConditionCourse[]
   sectionChangeRequest SectionChangeRequest[]
   examSchedule         ExamSchedule[]
+
+  @@unique([courseCode, section])
 }
 
 model ConditionCourse {

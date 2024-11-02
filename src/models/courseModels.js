@@ -27,6 +27,23 @@ courseModels.createCourse = async (courseCode, courseName, credits, seat, sectio
         },
     });
 };
+courseModels.editCourse = async (courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId) => {
+    return await prisma.course.update({
+        where: {
+            id: Number(courseId)
+        },
+        data: {
+            courseCode,
+            courseName,
+            credits,
+            seat,
+            section,
+            teacherId,
+            courseSyllabusId,
+            majorId
+        },
+    });
+};
 
 
 
