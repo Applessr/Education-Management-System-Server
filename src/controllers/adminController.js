@@ -245,7 +245,12 @@ adminController.changeStudentStatus = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
 
-        const { studentId, status } = req.body
+        const { studentId } = req.params
+        if (studentId) {
+            return createError(400, 'studentId is require')
+        }
+
+        const { status } = req.body
         if (!studentId && status) {
             return createError(400, 'All field is require')
         }
@@ -265,8 +270,12 @@ adminController.changeStudentInfo = async (req, res, next) => {
         if (employeeRole !== "ADMIN") {
             return createError(400, 'You do not have permission')
         }
+        const { studentId } = req.params
+        if (studentId) {
+            return createError(400, 'studentId is require')
+        }
 
-        const { studentId, firstName, lastName, phone, address } = req.body
+        const { firstName, lastName, phone, address } = req.body
         if (!studentId) {
             return createError(400, 'All field is require')
         }
@@ -309,8 +318,13 @@ adminController.changeEmployeeInfo = async (req, res, next) => {
         if (employeeRole !== "ADMIN") {
             return createError(400, 'You do not have permission')
         }
+        
+        const { employeeId } = req.params
+        if (employeeId) {
+            return createError(400, 'employeeId is require')
+        }
 
-        const { employeeId, firstName, lastName, phone } = req.body
+        const { firstName, lastName, phone } = req.body
         if (!employeeId) {
             return createError(400, 'Employee ID is require')
         }

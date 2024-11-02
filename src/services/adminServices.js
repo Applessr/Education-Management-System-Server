@@ -21,8 +21,8 @@ adminServices.createEmployee = async (data) => {
 adminServices.getStudentId = async (studentId) => {
     return await adminModels.findStudentId(studentId)
 };
-adminServices.findStudentCode = async (studentId) => {
-    return await adminModels.findStudentCode(studentId)
+adminServices.findStudentCode = async (studentCode) => {
+    return await adminModels.findStudentCode(studentCode)
 };
 
 adminServices.getStudentEmail = async (email) => {
