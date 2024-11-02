@@ -34,7 +34,7 @@ const registerEmployeeSchema = Joi.object({
         }),
     majorId: Joi.number()
         .integer()
-        .required()
+        .optional()
         .messages({
             "number.base": "Major ID is required and must be an integer"
         })

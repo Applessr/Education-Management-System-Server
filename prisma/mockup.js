@@ -33,7 +33,6 @@ mockUps.studentData = mockUps.studentData = [
         "majorId": 1,
         "adviserId": 4,
         "email": "elizabeth.wilson@pierre.university.edu",
-        "password": "1234567890",
         "gender": "FEMALE"
     },
     {
@@ -47,9 +46,8 @@ mockUps.studentData = mockUps.studentData = [
         "majorId": 1,
         "adviserId": 4,
         "email": "patricia.miller@pierre.university.edu",
-        "password": "1234567890",
         "gender": "FEMALE"
     }
 ];
-Parker
+
 module.exports = mockUps

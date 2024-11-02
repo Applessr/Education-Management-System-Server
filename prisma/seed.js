@@ -7,7 +7,7 @@ console.log('DB seed...')
 async function run() {
     await prisma.faculty.createMany({ data: mockUps.facultyData })
     await prisma.major.createMany({ data: mockUps.majorData })
-    await prisma.student.createMany({ data: mockUps.studentData })
+    // await prisma.student.createMany({ data: mockUps.studentData })
 }
 
 run();
