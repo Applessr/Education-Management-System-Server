@@ -24,7 +24,7 @@ studentModels.getNotification = async (userId) => {
     return await prisma.enrollment.findMany({
         where: {
             studentId: Number(userId),
-            status: 'APPROVED' 
+            status: 'APPROVED'
         },
         select: {
             course: {
@@ -48,7 +48,7 @@ studentModels.getNotification = async (userId) => {
                             }
                         }
                     },
-                    announcements: { 
+                    announcements: {
                         select: {
                             title: true,
                             content: true,
@@ -58,6 +58,23 @@ studentModels.getNotification = async (userId) => {
                 }
             }
         }
+    });
+};
+studentModels.getExamDate = async (userId) => {
+    return await prisma.examSchedule.findMany({
+        where: {
+            course: {
+                enrollments: {
+                    some: {
+                        studentId: userId,  
+                        status: 'APPROVED',
+                    },
+                },
+            },
+        },
+        include: {
+            course: true, 
+        },
     });
 };
 studentModels.changePassword = async (userId, newPassword) => {

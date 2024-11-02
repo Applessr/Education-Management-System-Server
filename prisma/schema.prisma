@@ -86,8 +86,8 @@ model Course {
   status               Boolean                @default(true)
   teacherId            Int?
   teacher              Employee?              @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  courseSyllabusId     Int
-  courseSyllabus       CourseSyllabus         @relation(fields: [courseSyllabusId], references: [id], onDelete: Cascade)
+  courseSyllabusId     Int?
+  courseSyllabus       CourseSyllabus?        @relation(fields: [courseSyllabusId], references: [id], onDelete: Cascade)
   majorId              Int
   major                Major                  @relation(fields: [majorId], references: [id], onDelete: Cascade)
   classSchedules       ClassSchedule[]

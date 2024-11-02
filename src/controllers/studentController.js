@@ -33,7 +33,22 @@ studentController.getNotification = async (req, res, next) => {
       
         res.status(200).json(notification);
     } catch (error) {
-        console.log('Error from student getProfile', error)
+        console.log('Error from student getNotification', error)
+        next(error);
+    }
+
+};
+studentController.getExamDate = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+        const examDate = await studentServices.getExamDate(userId);
+      
+        res.status(200).json(examDate);
+    } catch (error) {
+        console.log('Error from student getExamDate', error)
         next(error);
     }
 
