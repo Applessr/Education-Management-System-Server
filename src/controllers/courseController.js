@@ -32,7 +32,27 @@ courseController.getCourseById = async (req, res, next) => {
 courseController.createCourse = async (req, res, next) => {
     try {
         const { employeeRole } = req.user
-        if (employeeRole !== "ADMIN" && employeeRole !== "TEACHER" ) {
+        if (employeeRole !== "ADMIN" && employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId } = req.body
+        if (!(courseCode && courseName && credits && seat && section && teacherId)) {
+            return createError(400, 'All important fields is require')
+        }
+        const newCourse = await courseServices.createCourse(courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId);
+
+        res.status(200).json(newCourse);
+    } catch (error) {
+        console.log('Error from getCourseById', error)
+        next(error);
+    }
+
+};
+courseController.editCourse = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN" && employeeRole !== "TEACHER") {
             return createError(400, 'You do not have permission')
         }
 

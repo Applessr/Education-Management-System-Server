@@ -13,6 +13,9 @@ courseServices.getCourseById = async(courseId) => {
 courseServices.createCourse = async(courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId) => {
     return await courseModels.createCourse(courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId)
 };
+courseServices.editCourse = async(courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId) => {
+    return await courseModels.editCourse(courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId, majorId)
+};
 
 
 module.exports = courseServices;
