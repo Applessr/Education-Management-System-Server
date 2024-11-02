@@ -20,7 +20,7 @@ model Employee {
   password             String?
   active               Boolean                @default(true)
   firstName            String                 @map("first_name")
-  lastName             String                 @map("last_name")
+  lastName             String?                @map("last_name")
   phone                String?                @unique
   employeeRole         EmployeesRole?         @default(TEACHER) @map("employee_role")
   resetPasswordToken   String?
