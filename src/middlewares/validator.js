@@ -31,6 +31,12 @@ const registerEmployeeSchema = Joi.object({
         .pattern(/^[0-9]{10}$/)
         .messages({
             "string.pattern.base": "Phone number must be a 10-digit number"
+        }),
+    majorId: Joi.number()
+        .integer()
+        .required()
+        .messages({
+            "number.base": "Major ID is required and must be an integer"
         })
 });
 

@@ -27,9 +27,9 @@ model Employee {
   resetPasswordExpires DateTime?
   announcements        Announcement[]
   courses              Course[]
-  Student              Student[]
-  SectionChangeRequest SectionChangeRequest[]
-  InfoChangeRequest    InfoChangeRequest[]
+  student              Student[]
+  sectionChangeRequest SectionChangeRequest[]
+  infoChangeRequest    InfoChangeRequest[]
   majorId              Int?
   major                Major?                 @relation(fields: [majorId], references: [id], onDelete: Cascade)
 }
@@ -61,8 +61,8 @@ model Student {
   payments             Payment[]
   grades               Grade[]
   enrollments          Enrollment[]
-  SectionChangeRequest SectionChangeRequest[]
-  InfoChangeRequest    InfoChangeRequest[]
+  sectionChangeRequest SectionChangeRequest[]
+  infoChangeRequest    InfoChangeRequest[]
 }
 
 enum StudentGender {
@@ -94,8 +94,9 @@ model Course {
   enrollments          Enrollment[]
   grades               Grade[]
   announcements        Announcement[]
-  ConditionCourse      ConditionCourse[]
-  SectionChangeRequest SectionChangeRequest[]
+  conditionCourse      ConditionCourse[]
+  sectionChangeRequest SectionChangeRequest[]
+  examSchedule         ExamSchedule[]
 }
 
 model ConditionCourse {
@@ -187,7 +188,7 @@ model Faculty {
   id              Int               @id @default(autoincrement())
   name            String
   majors          Major[]
-  ConditionCourse ConditionCourse[]
+  conditionCourse ConditionCourse[]
 }
 
 model Major {
@@ -196,10 +197,10 @@ model Major {
   facultyId            Int
   faculty              Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
   courses              Course[]
-  Students             Student[]
-  CourseRecommendation CourseSyllabus[]
-  ConditionCourse      ConditionCourse[]
-  Employee             Employee[]
+  students             Student[]
+  courseRecommendation CourseSyllabus[]
+  conditionCourse      ConditionCourse[]
+  employee             Employee[]
 }
 
 model CourseSyllabus {
@@ -208,7 +209,7 @@ model CourseSyllabus {
   recommendationType RecommendationType @default(REQUIRED)
   majorId            Int
   major              Major              @relation(fields: [majorId], references: [id], onDelete: Cascade)
-  Course             Course[]
+  course             Course[]
 
   @@unique([majorId, year])
 }
@@ -248,4 +249,20 @@ model InfoChangeRequest {
   newValue      String
   employeeId    Int?
   employee      Employee?     @relation(fields: [employeeId], references: [id])
+}
+
+model ExamSchedule {
+  id        Int      @id @default(autoincrement())
+  examDate  DateTime
+  startTime String
+  endTime   String
+  room      String
+  examType  ExamType
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+enum ExamType {
+  MIDTERM
+  FINAL
 }

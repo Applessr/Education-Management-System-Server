@@ -12,9 +12,14 @@ adminRouter.get('/profile', adminController.getSelfProfile)
 //student
 adminRouter.get('/student', adminController.getAllStudent)
 adminRouter.get('/student/:studentId', adminController.getStudentById)
+adminRouter.patch('/student-status', adminController.changeStudentStatus)
+adminRouter.patch('/student-change-info', adminController.changeStudentInfo)
 //employee
 adminRouter.get('/employee', adminController.getAllEmployee)
 adminRouter.get('/employee/:employeeId', adminController.getEmployeeById)
+adminRouter.patch('/employee-change-info', adminController.changeEmployeeInfo)
+adminRouter.patch('/employee-active', adminController.activeEmployee)
+adminRouter.patch('/employee-inactive', adminController.inactiveEmployee)
 //request
 adminRouter.get('/request', adminController.getRequestInfo)
 adminRouter.get('/request/:requestId', adminController.getRequestInfoById)
