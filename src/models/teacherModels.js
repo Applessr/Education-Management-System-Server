@@ -81,7 +81,7 @@ teacherModels.getConsultedStudent = async (teacherId) => {
             firstName: true,
             lastName: true,
             phone: true,
-            Student: {
+            student: {
                 select: {
                     studentId: true,
                     email: true,
@@ -113,7 +113,7 @@ teacherModels.getSectionRequest = async (teacherId) => {
             firstName: true,
             lastName: true,
             phone: true,
-            SectionChangeRequest: {
+            sectionChangeRequest: {
                 select: {
                     requestedAt: true,
                     status: true,
