@@ -27,9 +27,9 @@ mockUps.studentData = mockUps.studentData = [
         "firstName": "Elizabeth",
         "lastName": "Wilson",
         "phone": "0853621877",
-        "dateOfBirth": new Date(2003, 4, 30),
+        "dateOfBirth": "2003-04-30T00:00:00.000Z",
         "address": "123 Maple Street, Los Angeles, CA, 90001, USA",
-        "admitDate": new Date(2021, 5, 7),
+        "admitDate": "2021-06-07T00:00:00.000Z",
         "majorId": 1,
         "adviserId": 4,
         "email": "elizabeth.wilson@pierre.university.edu",
@@ -40,13 +40,27 @@ mockUps.studentData = mockUps.studentData = [
         "firstName": "Patricia",
         "lastName": "Miller",
         "phone": "0853621878",
-        "dateOfBirth": new Date(2003, 2, 19),
+        "dateOfBirth": "2003-02-19T00:00:00.000Z",
         "address": "45 Oak Avenue, New York, NY, 10001, USA",
-        "admitDate": new Date(2021, 5, 7),
+        "admitDate": "2021-06-07T00:00:00.000Z",
         "majorId": 1,
         "adviserId": 4,
         "email": "patricia.miller@pierre.university.edu",
         "gender": "FEMALE"
+    },
+    {
+        "studentId": "640110003",
+        "firstName": "Donald",
+        "lastName": "Parker",
+        "phone": "0853621879",
+        "dateOfBirth": "2003-10-22T00:00:00.000Z",
+        "address": "789 Pine Lane, Chicago, IL, 60601, USA",
+        "admitDate": "2021-06-07T00:00:00.000Z",
+        "majorId": 1,
+        "adviserId": 5,
+        "email": "Donald.Parker@pierre.university.edu",
+        "password": "1234567890",
+        "gender": "MALE"
     }
 ];
 

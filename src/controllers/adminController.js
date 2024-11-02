@@ -394,7 +394,7 @@ adminController.activeEmployee = async (req, res, next) => {
         res.status(200).json({ message: `Employee active account successful` });
 
     } catch (error) {
-        console.log('Error from inactiveEmployee', error)
+        console.log('Error from activeEmployee', error)
         next(error);
     }
 };

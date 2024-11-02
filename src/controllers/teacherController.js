@@ -105,7 +105,7 @@ teacherController.getSectionRequest = async (req, res, next) => {
         res.status(200).json(changeSectionRequest);
 
     } catch (error) {
-        console.log('Error from getConsultedStudent', error)
+        console.log('Error from getSectionRequest', error)
         next(error);
     }
 }
@@ -144,7 +144,7 @@ teacherController.sendAnnounce = async (req, res, next) => {
         const announce = await teacherServices.sendAnnounce(teacherId, title, content, courseId)
         res.status(201).json(announce);
     } catch (error) {
-        console.log('Error from sendRequestChange', error)
+        console.log('Error from sendAnnounce', error)
         next(error);
     }
 
