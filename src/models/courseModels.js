@@ -70,6 +70,7 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
                     }
                 }
             },
+            
             enrollments: {
                 where: {
                     status: 'APPROVED',

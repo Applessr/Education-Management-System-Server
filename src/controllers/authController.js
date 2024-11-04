@@ -150,7 +150,7 @@ authController.loginGoogle = async (req, res, next) => {
             },
         };
 
-        const accessToken = jwtServices.sign({ id: employee.id });
+        const accessToken = jwtServices.sign({ id: employee.id, type: 'EMPLOYEE' });
 
         res.status(200).json({
             message: 'Login successful',

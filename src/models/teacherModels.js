@@ -76,7 +76,7 @@ teacherModels.getStudentInCourse = async (teacherId) => {
     });
 };
 teacherModels.getConsultedStudent = async (teacherId) => {
-    return await prisma.employee.findMany({
+    const students = await prisma.employee.findMany({
         where: {
             id: Number(teacherId)
         },
@@ -92,6 +92,7 @@ teacherModels.getConsultedStudent = async (teacherId) => {
                     firstName: true,
                     lastName: true,
                     phone: true,
+                    gender: true,
                     major: {
                         select: {
                             name: true,
@@ -106,6 +107,26 @@ teacherModels.getConsultedStudent = async (teacherId) => {
             }
         }
     });
+
+    const genderCount = {
+        male: 0,
+        female: 0
+    };
+
+    students.forEach(teacher => {
+        teacher.student.forEach(student => {
+            if (student.gender === 'MALE') {
+                genderCount.male += 1;
+            } else if (student.gender === 'FEMALE') {
+                genderCount.female += 1;
+            }
+        });
+    });
+
+    return {
+        students, 
+        genderCount 
+    };
 };
 teacherModels.getEnrollRequest = async (teacherId) => {
     return await prisma.course.findMany({
