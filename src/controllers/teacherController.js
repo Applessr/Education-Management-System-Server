@@ -7,6 +7,7 @@ const teacherController = {};
 
 teacherController.getProfile = async (req, res, next) => {
     try {
+
         const teacherId = req.user.id
         if (!teacherId) {
             return createError(400, 'Check token expired date')
@@ -25,6 +26,10 @@ teacherController.getProfile = async (req, res, next) => {
 };
 teacherController.teacherChangePassword = async (req, res, next) => {
     try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
         const teacherId = req.user.id
         if (!teacherId) {
             return createError(400, 'Check token expired date')
@@ -66,6 +71,10 @@ teacherController.teacherChangePassword = async (req, res, next) => {
 };
 teacherController.getStudentInCourse = async (req, res, next) => {
     try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
         const teacherId = req.user.id
         if (!teacherId) {
             return createError(400, 'Check token expired date')
@@ -78,9 +87,13 @@ teacherController.getStudentInCourse = async (req, res, next) => {
         console.log('Error from getConsultedStudent', error)
         next(error);
     }
-}
+};
 teacherController.getConsultedStudent = async (req, res, next) => {
     try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
         const teacherId = req.user.id
         if (!teacherId) {
             return createError(400, 'Check token expired date')
@@ -93,9 +106,34 @@ teacherController.getConsultedStudent = async (req, res, next) => {
         console.log('Error from getConsultedStudent', error)
         next(error);
     }
-}
+};
+teacherController.getEnrollRequest = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const teacherId = req.user.id
+        if (!teacherId) {
+            return createError(400, 'Check token expired date')
+        }
+        const enrollRequest = await teacherServices.getEnrollRequest(teacherId);
+
+        res.status(200).json(enrollRequest);
+
+    } catch (error) {
+        console.log('Error from getEnrollRequest', error)
+        next(error);
+    }
+};
 teacherController.getSectionRequest = async (req, res, next) => {
     try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
         const teacherId = req.user.id
         if (!teacherId) {
             return createError(400, 'Check token expired date')
@@ -108,7 +146,7 @@ teacherController.getSectionRequest = async (req, res, next) => {
         console.log('Error from getSectionRequest', error)
         next(error);
     }
-}
+};
 teacherController.sendRequestChange = async (req, res, next) => {
     try {
         const teacherId = req.user.id
@@ -128,9 +166,14 @@ teacherController.sendRequestChange = async (req, res, next) => {
         next(error);
     }
 
-}
+};
 teacherController.sendAnnounce = async (req, res, next) => {
     try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
         const teacherId = req.user.id
         if (!teacherId) {
             return createError(400, 'Check token expired date')
@@ -148,7 +191,85 @@ teacherController.sendAnnounce = async (req, res, next) => {
         next(error);
     }
 
-}
+};
+teacherController.editEnrollStatus = async (req, res, next) => {
+    try {
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { enrollmentId } = req.params
+        if (!enrollmentId) {
+            return createError(400, 'enrollmentId is require')
+        }
+
+        const { status } = req.body
+        if (!status) {
+            return createError('update status is require')
+        }
+
+        const updateStatus = await teacherServices.editEnrollStatus(enrollmentId, status)
+        res.status(200).json(updateStatus);
+    } catch (error) {
+        console.log('Error from sendAnnounce', error)
+        next(error);
+    }
+
+};
+teacherController.editRequestSection = async (req, res, next) => {
+    try {
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { requestId } = req.params
+        if (!requestId) {
+            return createError(400, 'enrollmentId is require')
+        }
+
+        const { status } = req.body
+        if (!status) {
+            return createError('update status is require')
+        }
+
+        const updateStatus = await teacherServices.editRequestSection(requestId, status)
+        res.status(200).json(updateStatus);
+    } catch (error) {
+        console.log('Error from sendAnnounce', error)
+        next(error);
+    }
+
+};
+teacherController.editStudentSection = async (req, res, next) => {
+    try {
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const { enrollmentId } = req.params
+        if (!enrollmentId) {
+            return createError(400, 'enrollmentId is require')
+        }
+
+        const { courseId } = req.body
+        if (!courseId) {
+            return createError('update section is require')
+        }
+
+        const updateSection = await teacherServices.editStudentSection(enrollmentId, courseId)
+        res.status(200).json(updateSection);
+    } catch (error) {
+        console.log('Error from sendAnnounce', error)
+        next(error);
+    }
+
+};
 
 
 module.exports = teacherController;

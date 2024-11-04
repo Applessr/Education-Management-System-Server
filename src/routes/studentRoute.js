@@ -10,6 +10,7 @@ studentRouter.get('/exam-date', studentController.getExamDate)
 
 studentRouter.post('/change-password', studentController.studentChangePassword)
 studentRouter.post('/request-change', studentController.sendRequestChange)
+studentRouter.post('/request-section', studentController.sendRequestSection)
 
 
 module.exports = studentRouter;

@@ -31,9 +31,9 @@ teacherModels.changePassword = async (teacherId, newPassword) => {
     });
 };
 teacherModels.getStudentInCourse = async (teacherId) => {
-    return await prisma.employee.findMany({
+    return await prisma.employee.findUnique({
         where: {
-            id: Number(teacherId)
+            id: Number(teacherId),
         },
         select: {
             email: true,
@@ -42,7 +42,12 @@ teacherModels.getStudentInCourse = async (teacherId) => {
             phone: true,
             courses: {
                 select: {
+                    courseCode: true,
+                    courseName: true,
                     enrollments: {
+                        where: {
+                            status: 'APPROVED'
+                        },
                         select: {
                             student: {
                                 select: {
@@ -65,10 +70,9 @@ teacherModels.getStudentInCourse = async (teacherId) => {
                             }
                         }
                     },
-
-                }
-            }
-        }
+                },
+            },
+        },
     });
 };
 teacherModels.getConsultedStudent = async (teacherId) => {
@@ -96,6 +100,34 @@ teacherModels.getConsultedStudent = async (teacherId) => {
                                     name: true
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+    });
+};
+teacherModels.getEnrollRequest = async (teacherId) => {
+    return await prisma.course.findMany({
+        where: {
+            teacherId: teacherId
+        },
+        select: {
+            courseCode: true,
+            courseName: true,
+            enrollments: {
+                select: {
+                    id: true,
+                    status: true,
+                    registrationDate: true,
+                    semester: true,
+                    student: {
+                        select: {
+                            studentId: true,
+                            email: true,
+                            firstName: true,
+                            lastName: true,
+                            phone: true
                         }
                     }
                 }
@@ -169,8 +201,8 @@ teacherModels.sendRequestChange = async (teacherId, fieldToChange, newValue) => 
             fieldToChange,
             newValue
         }
-    })
-}
+    });
+};
 teacherModels.sendAnnounce = async (teacherId, title, content, courseId) => {
     return prisma.announcement.create({
         data: {
@@ -179,6 +211,36 @@ teacherModels.sendAnnounce = async (teacherId, title, content, courseId) => {
             content,
             courseId: Number(courseId)
         }
-    })
-}
+    });
+};
+teacherModels.editEnrollStatus = async (enrollmentId, status) => {
+    return await prisma.enrollment.update({
+        where: {
+            id: Number(enrollmentId)
+        },
+        data: {
+            status,
+        },
+    });
+};
+teacherModels.editRequestSection = async (requestId, status) => {
+    return await prisma.sectionChangeRequest.update({
+        where: {
+            id: Number(requestId)
+        },
+        data: {
+            status,
+        },
+    });
+};
+teacherModels.editStudentSection = async (enrollmentId, courseId) => {
+    return await prisma.enrollment.update({
+        where: {
+            id: Number(enrollmentId)
+        },
+        data: {
+            courseId: Number(courseId),
+        },
+    });
+};
 module.exports = teacherModels;

@@ -17,4 +17,7 @@ studentServices.changePassword = async (userId, newPassword) => {
 studentServices.sendRequestChange = async (userId, fieldToChange, newValue) => {
     return await studentModels.sendRequestChange(userId, fieldToChange, newValue)
 };
+studentServices.sendRequestSection = async (userId, courseId, currentSection, newSection, teacherId) => {
+    return await studentModels.sendRequestSection(userId, courseId, currentSection, newSection, teacherId)
+};
 module.exports = studentServices;

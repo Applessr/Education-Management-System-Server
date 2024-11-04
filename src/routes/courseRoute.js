@@ -17,6 +17,14 @@ courseRouter.patch('/employee/active-course/:courseId', authenticate, courseCont
 
 //student
 courseRouter.get('/student/course-syllabus', authenticate, courseController.studentGetCourseSyllabus)
+courseRouter.get('/student/enroll-course', authenticate, courseController.studentGetEnrollCourse)
+courseRouter.get('/student/enroll-course-semester', authenticate, courseController.studentGetEnrollCourseBySemester)
+courseRouter.get('/student/class-schedule', authenticate, courseController.studentGetClassScheduleBySemester)
+
+courseRouter.post('/student/enroll-course', authenticate, courseController.studentCreateEnroll)
+
+courseRouter.patch('/student/cancel-course/:enrollmentId', authenticate, courseController.studentCancelEnroll)
+
 
 
 module.exports = courseRouter;

@@ -8,7 +8,9 @@ courseController.getAllCourse = async (req, res, next) => {
 
         const { searchTerm } = req.query;
 
-        const allCourse = await courseServices.getAllCourse(searchTerm);
+        const { semester } = req.body;
+
+        const allCourse = await courseServices.getAllCourse(searchTerm, semester);
 
         res.status(200).json(allCourse);
     } catch (error) {
@@ -127,7 +129,7 @@ courseController.inactiveCourse = async (req, res, next) => {
 
         res.status(200).json({ message: "Course Inactive successful" });
     } catch (error) {
-        console.log('Error from editCourse', error)
+        console.log('Error from inactiveCourse', error)
         next(error);
     }
 
@@ -152,7 +154,7 @@ courseController.activeCourse = async (req, res, next) => {
 
         res.status(200).json({ message: "Course active successful" });
     } catch (error) {
-        console.log('Error from editCourse', error)
+        console.log('Error from activeCourse', error)
         next(error);
     }
 
@@ -170,7 +172,113 @@ courseController.studentGetCourseSyllabus = async (req, res, next) => {
 
         res.status(200).json(courseSyllabus);
     } catch (error) {
-        console.log('Error from editCourse', error)
+        console.log('Error from studentGetCourseSyllabus', error)
+        next(error);
+    }
+
+};
+courseController.studentGetEnrollCourse = async (req, res, next) => {
+    try {
+
+        const studentId = req.user.id
+
+        if (!studentId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const enrollCourse = await courseServices.studentGetEnrollCourse(studentId)
+
+        res.status(200).json(enrollCourse);
+    } catch (error) {
+        console.log('Error from studentGetEnrollCourse', error)
+        next(error);
+    }
+
+};
+courseController.studentGetEnrollCourseBySemester = async (req, res, next) => {
+    try {
+
+        const studentId = req.user.id
+        if (!studentId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { semester } = req.body
+        if (!semester) {
+            return createError(400, 'semester is require')
+        }
+
+        const enrollCourse = await courseServices.studentGetEnrollCourseBySemester(studentId, semester)
+
+        res.status(200).json(enrollCourse);
+    } catch (error) {
+        console.log('Error from studentGetEnrollCourseBySemester', error)
+        next(error);
+    }
+
+};
+courseController.studentGetClassScheduleBySemester = async (req, res, next) => {
+    try {
+
+        const studentId = req.user.id
+        if (!studentId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { semester } = req.body
+        if (!semester) {
+            return createError(400, 'semester is require')
+        }
+
+        const classSchedule = await courseServices.studentGetClassScheduleBySemester(studentId, semester)
+
+        res.status(200).json(classSchedule);
+    } catch (error) {
+        console.log('Error from studentGetEnrollCourseBySemester', error)
+        next(error);
+    }
+
+};
+courseController.studentCreateEnroll = async (req, res, next) => {
+    try {
+
+        const studentId = req.user.id
+        if (!studentId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { semester, courseId } = req.body
+        if (!semester && !courseId) {
+            return createError(400, 'all fields is require')
+        }
+
+        const enrollCourse = await courseServices.studentCreateEnroll(studentId, semester, courseId)
+
+        res.status(200).json(enrollCourse);
+    } catch (error) {
+        console.log('Error from studentCreateEnroll', error)
+        next(error);
+    }
+
+};
+courseController.studentCancelEnroll = async (req, res, next) => {
+    try {
+
+        const studentId = req.user.id
+        if (!studentId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { enrollmentId } = req.params
+        if (!enrollmentId) {
+            return createError(400, 'enrollmentId is require')
+        }
+
+        const cancelEnroll = await courseServices.studentCancelEnroll(enrollmentId)
+
+        res.status(200).json({ message: "cancel enrollment success" });
+    } catch (error) {
+        console.log('Error from studentCancelEnroll', error)
         next(error);
     }
 
