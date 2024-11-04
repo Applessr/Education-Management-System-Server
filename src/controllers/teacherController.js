@@ -35,7 +35,7 @@ teacherController.teacherChangePassword = async (req, res, next) => {
             return createError(400, 'Check token expired date')
         }
 
-        const account = await teacherServices.getStudentProfile(teacherId);
+        const account = await teacherServices.teacherProfile(teacherId);
         if (!account) {
             return createError(404, 'Account not found')
         }
