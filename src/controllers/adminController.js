@@ -318,7 +318,7 @@ adminController.changeEmployeeInfo = async (req, res, next) => {
         if (employeeRole !== "ADMIN") {
             return createError(400, 'You do not have permission')
         }
-        
+
         const { employeeId } = req.params
         if (employeeId) {
             return createError(400, 'employeeId is require')

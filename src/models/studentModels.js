@@ -8,6 +8,14 @@ studentModels.studentProfile = async (userId) => {
             id: Number(userId)
         },
         include: {
+            adviser: {
+                select: {
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    phone: true
+                }
+            },
             major: {
                 include: {
                     faculty: {
@@ -66,14 +74,14 @@ studentModels.getExamDate = async (userId) => {
             course: {
                 enrollments: {
                     some: {
-                        studentId: userId,  
+                        studentId: userId,
                         status: 'APPROVED',
                     },
                 },
             },
         },
         include: {
-            course: true, 
+            course: true,
         },
     });
 };
@@ -93,6 +101,17 @@ studentModels.sendRequestChange = async (userId, fieldToChange, newValue) => {
             newValue
         }
     })
+};
+studentModels.sendRequestSection = async (userId, courseId, currentSection, newSection, teacherId) => {
+    return prisma.sectionChangeRequest.create({
+        data: {
+            studentId: userId,
+            courseId: courseId,
+            currentSection: currentSection,
+            newSection: newSection || null,
+            teacherId: teacherId || null
+        }
+    });
 };
 
 module.exports = studentModels;

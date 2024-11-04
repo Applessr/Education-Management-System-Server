@@ -34,9 +34,7 @@ authController.loginEmployee = async (req, res, next) => {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                email: user.email,
                 role: user.employeeRole,
-                phone: user.phone
             },
         };
 
@@ -86,10 +84,6 @@ authController.loginStudent = async (req, res, next) => {
                 studentId: student.studentId,
                 firstName: student.firstName,
                 lastName: student.lastName,
-                email: student.email,
-                phone: student.phone,
-                faculty: student.major.faculty.name,
-                major: student.major.name,
                 role: 'STUDENT',
             },
         };
@@ -152,9 +146,7 @@ authController.loginGoogle = async (req, res, next) => {
                 id: employee.id,
                 firstName: employee.firstName,
                 lastName: employee.lastName,
-                email: employee.email,
                 role: employee.employeeRole,
-                phone: employee.phone
             },
         };
 
@@ -190,9 +182,9 @@ authController.forgetPassword = async (req, res, next) => {
 
         await sendEmailServices.sendResetEmail(email, token, user.username);
         res.status(200).json({ message: 'Password reset email sent.' });
-    } catch (err) {
-        console.log('error from forgetPassword', err)
-        next(err);
+    } catch (error) {
+        console.log('error from forgetPassword', error)
+        next(error);
     }
 };
 authController.resetPassword = async (req, res, next) => {
@@ -218,10 +210,28 @@ authController.resetPassword = async (req, res, next) => {
         await authServices.updatePassword(employee.id, hashedPassword);
 
         res.status(200).json({ message: 'Password has been reset successfully' });
-    } catch (err) {
-        console.log('error from resetPassword', err);
-        next(err);
+    } catch (error) {
+        console.log('error from resetPassword', error);
+        next(error);
     }
 };
+authController.currentUser = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const currentUser = await authServices.currentUser(userId);
+        if (!currentUser) {
+            return createError(404, 'User not found');
+        }
+        delete currentUser.password;
+        res.status(200).json(currentUser);
+    } catch (error) {
+        console.log('error from resetPassword', error);
+        next(error);
+    }
+}
 
 module.exports = authController;

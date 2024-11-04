@@ -32,5 +32,8 @@ authServices.updateResetPassword = async (email, token, expiryDate) => {
 authServices.updatePassword = async (employeeId, hashedPassword) => {
     return await authModels.updatePassword(employeeId, hashedPassword)
 };
+authServices.currentUser = async (userId) => {
+    return await authModels.currentUser(userId)
+};
 
 module.exports = authServices;

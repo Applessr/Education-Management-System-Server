@@ -30,7 +30,7 @@ studentController.getNotification = async (req, res, next) => {
             return createError(400, 'Check token expired date')
         }
         const notification = await studentServices.getNotification(userId);
-      
+
         res.status(200).json(notification);
     } catch (error) {
         console.log('Error from student getNotification', error)
@@ -45,7 +45,7 @@ studentController.getExamDate = async (req, res, next) => {
             return createError(400, 'Check token expired date')
         }
         const examDate = await studentServices.getExamDate(userId);
-      
+
         res.status(200).json(examDate);
     } catch (error) {
         console.log('Error from student getExamDate', error)
@@ -82,13 +82,13 @@ studentController.studentChangePassword = async (req, res, next) => {
         if (newPassword.length < 6) {
             return createError(400, 'New password must be at least 6 characters long');
         }
-       
+
         let changePassword = await hashServices.hash(newPassword);
 
-        const updatedUser = await studentServices.changePassword(userId, {password: changePassword});
+        const updatedUser = await studentServices.changePassword(userId, { password: changePassword });
         delete updatedUser.password;
 
-        res.status(200).json({ message: 'password change successfully'});    
+        res.status(200).json({ message: 'password change successfully' });
 
     } catch (error) {
         console.log('Error from student change password', error)
@@ -112,9 +112,29 @@ studentController.sendRequestChange = async (req, res, next) => {
     } catch (error) {
         console.log('Error from sendRequestChange', error)
         next(error);
-    }
+    };
 
-}
+};
+studentController.sendRequestSection = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { courseId, currentSection, newSection, teacherId } = req.body
+        if (!(courseId && currentSection && newSection && teacherId)) {
+            return createError('All fields is require')
+        }
+
+        const request = await studentServices.sendRequestSection(userId, courseId, currentSection, newSection, teacherId)
+        res.status(201).json(request);
+    } catch (error) {
+        console.log('Error from sendRequestChange', error)
+        next(error);
+    };
+
+};
 
 
 
