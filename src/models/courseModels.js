@@ -190,10 +190,8 @@ courseModels.activeCourse = async (courseId) => {
     });
 };
 courseModels.studentGetCourseSyllabus = async (studentId) => {
-    return await prisma.student.findUnique({
-        where: {
-            id: studentId
-        },
+    const student = await prisma.student.findUnique({
+        where: { id: studentId },
         select: {
             id: true,
             studentId: true,
@@ -205,10 +203,7 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
                     id: true,
                     name: true,
                     faculty: {
-                        select: {
-                            id: true,
-                            name: true
-                        }
+                        select: { id: true, name: true }
                     },
                     courseRecommendation: {
                         select: {
@@ -229,6 +224,42 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
             }
         }
     });
+
+    if (!student || !student.major || !student.major.courseRecommendation) {
+        return null;
+    }
+
+    const coursesGroupedByType = {
+        REQUIRED: [],
+        ELECTIVE: []
+    };
+
+    const uniqueCourses = new Map();
+
+    student.major.courseRecommendation.forEach(rec => {
+        rec.course.forEach(course => {
+            if (!uniqueCourses.has(course.courseCode)) {
+                uniqueCourses.set(course.courseCode, {
+                    ...course,
+                    recommendationType: rec.recommendationType
+                });
+
+                if (rec.recommendationType === 'REQUIRED') {
+                    coursesGroupedByType.REQUIRED.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'ELECTIVE') {
+                    coursesGroupedByType.ELECTIVE.push(uniqueCourses.get(course.courseCode));
+                }
+            }
+        });
+    });
+
+    return {
+        ...student,
+        major: {
+            ...student.major,
+            courseRecommendation: coursesGroupedByType
+        }
+    };
 };
 courseModels.studentGetEnrollCourse = async (studentId) => {
     return await prisma.student.findUnique({
