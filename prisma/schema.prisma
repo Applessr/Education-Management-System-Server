@@ -94,21 +94,24 @@ model Course {
   enrollments          Enrollment[]
   grades               Grade[]
   announcements        Announcement[]
-  conditionCourse      ConditionCourse[]
+  conditionCourse      ConditionCourse[]      @relation("PrerequisiteCourse")
   sectionChangeRequest SectionChangeRequest[]
   examSchedule         ExamSchedule[]
+  ConditionCourse      ConditionCourse[]
 
   @@unique([courseCode, section])
 }
 
 model ConditionCourse {
-  id        Int     @id @default(autoincrement())
-  courseId  Int
-  courses   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  facultyId Int
-  faculty   Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
-  majorId   Int
-  major     Major   @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  id                   Int     @id @default(autoincrement())
+  courseId             Int // The course that has a prerequisite
+  courses              Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  facultyId            Int
+  faculty              Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  majorId              Int
+  major                Major   @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  prerequisiteCourseId Int
+  prerequisiteCourse   Course  @relation("PrerequisiteCourse", fields: [prerequisiteCourseId], references: [id], onDelete: Cascade)
 }
 
 model ClassSchedule {
@@ -209,7 +212,7 @@ model Major {
 model CourseSyllabus {
   id                 Int                @id @default(autoincrement())
   year               String
-  recommendationType RecommendationType @default(REQUIRED)
+  recommendationType RecommendationType @default(PREREQUISITES)
   majorId            Int
   major              Major              @relation(fields: [majorId], references: [id], onDelete: Cascade)
   course             Course[]
@@ -218,8 +221,9 @@ model CourseSyllabus {
 }
 
 enum RecommendationType {
-  REQUIRED
-  ELECTIVE
+  PREREQUISITES
+  OPTIONAL
+  SELECTION
 }
 
 model SectionChangeRequest {

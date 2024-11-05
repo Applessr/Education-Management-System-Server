@@ -70,6 +70,7 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
                     }
                 }
             },
+            
             enrollments: {
                 where: {
                     status: 'APPROVED',
@@ -229,14 +230,12 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
         return null;
     }
 
-    const coursesGroupedByType = {
-        REQUIRED: [],
-        ELECTIVE: []
-    };
+    const sortedRecommendations = student.major.courseRecommendation.sort((a, b) => a.id - b.id);
 
+    const coursesGroupedByYear = {};
     const uniqueCourses = new Map();
 
-    student.major.courseRecommendation.forEach(rec => {
+    sortedRecommendations.forEach(rec => {
         rec.course.forEach(course => {
             if (!uniqueCourses.has(course.courseCode)) {
                 uniqueCourses.set(course.courseCode, {
@@ -244,10 +243,17 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
                     recommendationType: rec.recommendationType
                 });
 
+                if (!coursesGroupedByYear[rec.year]) {
+                    coursesGroupedByYear[rec.year] = {
+                        REQUIRED: [],
+                        ELECTIVE: []
+                    };
+                }
+
                 if (rec.recommendationType === 'REQUIRED') {
-                    coursesGroupedByType.REQUIRED.push(uniqueCourses.get(course.courseCode));
+                    coursesGroupedByYear[rec.year].REQUIRED.push(uniqueCourses.get(course.courseCode));
                 } else if (rec.recommendationType === 'ELECTIVE') {
-                    coursesGroupedByType.ELECTIVE.push(uniqueCourses.get(course.courseCode));
+                    coursesGroupedByYear[rec.year].ELECTIVE.push(uniqueCourses.get(course.courseCode));
                 }
             }
         });
@@ -257,7 +263,7 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
         ...student,
         major: {
             ...student.major,
-            courseRecommendation: coursesGroupedByType
+            courseRecommendation: coursesGroupedByYear
         }
     };
 };

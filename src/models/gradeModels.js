@@ -79,7 +79,7 @@ gradeModels.studentGetScore = async (studentId, courseId) => {
 gradeModels.studentGetAllGPA = async (studentId) => {
     const semesters = await prisma.enrollment.findMany({
         where: {
-            studentId: studentId,
+            studentId: Number(studentId),
             status: "APPROVED",
         },
         select: {
@@ -89,49 +89,83 @@ gradeModels.studentGetAllGPA = async (studentId) => {
         distinct: ['semester'],
     });
 
-    let gpaSum = 0;
-    let totalSemesters = 0;
+    let totalGradePoints = 0;
+    let totalCredits = 0;
 
     for (const semester of semesters) {
-        const semesterGPA = await gradeModels.studentGetGPABySemester(studentId, semester.semester);
-        gpaSum += semesterGPA;
-        totalSemesters++;
+        const { semesterGPA, semesterCredits } = await gradeModels.studentGetGPABySemester(studentId, semester.semester);
+
+        totalGradePoints += semesterGPA * semesterCredits;
+        totalCredits += semesterCredits;
     }
 
-    const averageGPA = totalSemesters > 0 ? gpaSum / totalSemesters : 0;
+    const averageGPA = totalCredits > 0 ? totalGradePoints / totalCredits : 0;
     return averageGPA;
 };
 gradeModels.studentGetGPABySemester = async (studentId, semester) => {
     const enrollments = await prisma.enrollment.findMany({
         where: {
+            studentId: Number(studentId),
             semester: semester,
-            status: "APPROVED",
-            studentId: studentId,
+            status: 'APPROVED',
         },
         include: {
-            course: true,
+            course: {
+                include: {
+                    grades: {
+                        where: {
+                            studentId: Number(studentId),
+                        },
+                    },
+                },
+            },
         },
     });
 
-    let totalPoints = 0;
+    let totalGradePoints = 0;
     let totalCredits = 0;
 
-    for (const enrollment of enrollments) {
-        const grade = await prisma.grade.findFirst({
-            where: {
-                studentId: enrollment.studentId,
-                courseId: enrollment.courseId,
-            },
-        });
+    const gradePointMap = {
+        'A': 4.0,
+        'B+': 3.5,
+        'B': 3.0,
+        'C+': 2.5,
+        'C': 2.0,
+        'D+': 1.5,
+        'D': 1.0,
+        'F': 0.0
+    };
 
-        if (grade) {
-            totalPoints += 4 * enrollment.course.credits;
-            totalCredits += enrollment.course.credits;
+    console.log(`Enrollments for Semester ${semester}:`, enrollments);
+
+    for (const enrollment of enrollments) {
+        const grade = enrollment.course.grades[0];
+        const credits = enrollment.course.credits;
+
+        console.log(`Grades for Course ID: ${enrollment.courseId}`, enrollment.course.grades); // Debugging
+
+        if (grade && grade.letterGrade !== null) {
+            const letterGrade = grade.letterGrade
+            const gradePoint = gradePointMap[letterGrade];
+
+            if (gradePoint !== undefined) {
+                totalGradePoints += gradePoint * credits;
+                console.log(`Course ID: ${enrollment.courseId}, Letter Grade: ${letterGrade}, Grade Points: ${gradePoint}, Credits: ${credits}`);
+            } else {
+                console.log(`Invalid letter grade for Course ID: ${enrollment.courseId}`);
+            }
+        } else {
+            console.log(`No valid grade found for Course ID: ${enrollment.courseId}`);
         }
+
+        totalCredits += credits;
     }
 
-    const gpa = totalCredits > 0 ? totalPoints / totalCredits : 0;
-    return gpa;
+    const semesterGPA = totalCredits > 0 ? totalGradePoints / totalCredits : 0;
+
+    console.log(`Total Grade Points: ${totalGradePoints}, Total Credits: ${totalCredits}, Semester GPA: ${semesterGPA}`);
+
+    return { semesterGPA, semesterCredits: totalCredits };
 };
 gradeModels.teacherAddScore = async (studentId, courseId, semester, type, point) => {
     const gradeId = await gradeModels.findOrCreateGrade(studentId, courseId, semester);

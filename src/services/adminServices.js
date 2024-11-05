@@ -9,6 +9,9 @@ adminServices.getEmployeeEmail = async (email) => {
 adminServices.getEmployeeById = async (userId) => {
     return await adminModels.findEmployeeByID(userId)
 };
+adminServices.overAll = async () => {
+    return await adminModels.overAll()
+};
 
 adminServices.getEmployeePhone = async (phone) => {
     return await adminModels.findPhone(phone)

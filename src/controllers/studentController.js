@@ -5,6 +5,36 @@ const createError = require("../utils/create-error");
 
 const studentController = {};
 
+studentController.getProgress = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+        const studentProgress = await studentServices.getProgress(userId);
+
+        res.status(200).json(studentProgress);
+    } catch (error) {
+        console.log('Error from student getProgress', error)
+        next(error);
+    }
+
+};
+studentController.getCredit = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+        const studentCredit = await studentServices.getCredit(userId);
+
+        res.status(200).json(studentCredit);
+    } catch (error) {
+        console.log('Error from student getProgress', error)
+        next(error);
+    }
+
+};
 studentController.getProfile = async (req, res, next) => {
     try {
         const userId = req.user.id
