@@ -208,13 +208,13 @@ model Major {
 
 model CourseSyllabus {
   id                 Int                @id @default(autoincrement())
-  year               Int
+  year               String
   recommendationType RecommendationType @default(REQUIRED)
   majorId            Int
   major              Major              @relation(fields: [majorId], references: [id], onDelete: Cascade)
   course             Course[]
 
-  @@unique([majorId, year])
+  @@unique([majorId, year, recommendationType])
 }
 
 enum RecommendationType {

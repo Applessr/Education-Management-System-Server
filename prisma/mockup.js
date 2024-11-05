@@ -9,7 +9,7 @@ mockUps.facultyData = [
 
 ]
 mockUps.majorData = [
-    { "name": "Physics", "facultyId": 1 },
+    { "name": "Astronomy", "facultyId": 1 },
     { "name": "Chemistry", "facultyId": 1 },
     { "name": "Criminal Law", "facultyId": 2 },
     { "name": "International Law", "facultyId": 2 },
