@@ -16,6 +16,53 @@ adminModels.findEmployeeByID = async (userId) => {
         },
     });
 };
+adminModels.overAll = async () => {
+    const teacher = await prisma.employee.count({
+        where: {
+            employeeRole: 'TEACHER'
+        }
+    });
+
+    const faculty = await prisma.faculty.count({});
+
+    const major = await prisma.major.count({});
+
+    const uniqueCourses = await prisma.course.findMany({
+        distinct: ['courseCode'],
+        select: {
+            courseCode: true
+        }
+    });
+
+    const subject = uniqueCourses.length;
+
+    const student = await prisma.student.count({
+        where: {
+            status: 'ACTIVE'
+        }
+    })
+
+    const maleStudent = await prisma.student.count({
+        where: {
+            gender: 'MALE'
+        }
+    })
+    const femaleStudent = await prisma.student.count({
+        where: {
+            gender: 'FEMALE'
+        }
+    })
+
+    return {
+        teacher,
+        faculty,
+        major,
+        subject,
+        student,
+        maleStudent,
+        femaleStudent,
+    }
+};
 adminModels.findPhone = async (phone) => {
     return await prisma.employee.findUnique({
         where: {

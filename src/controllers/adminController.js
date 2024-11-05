@@ -105,6 +105,29 @@ adminController.getSelfProfile = async (req, res, next) => {
         next(error);
     }
 }
+adminController.overAll = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        if (!userId) {
+            return createError(400, 'Check token expired date')
+        }
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "ADMIN") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const overAll = await adminServices.overAll();
+        if (!overAll) {
+            return createError(404, 'No information found not found')
+        }
+        res.status(200).json(overAll);
+
+    } catch (error) {
+        console.log('Error from getSelfProfile', error)
+        next(error);
+    }
+}
 adminController.getAllStudent = async (req, res, next) => {
     try {
         const userId = req.user.id

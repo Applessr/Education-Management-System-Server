@@ -7,7 +7,8 @@ const adminRouter = express.Router()
 adminRouter.post('/register-employee', registerEmployeeValidator, adminController.registerEmployee)
 adminRouter.post('/register-student', registerStudentValidator, adminController.registerStudent)
 //admin
-adminRouter.get('/profile', adminController.getSelfProfile)
+adminRouter.get('/profile', adminController.getSelfProfile);
+adminRouter.get('/over-all', adminController.overAll);
 
 //student
 adminRouter.get('/student', adminController.getAllStudent)

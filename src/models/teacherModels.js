@@ -62,13 +62,13 @@ teacherModels.getStudentInCourse = async (teacherId) => {
                                             faculty: {
                                                 select: {
                                                     name: true
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -93,19 +93,20 @@ teacherModels.getConsultedStudent = async (teacherId) => {
                     lastName: true,
                     phone: true,
                     gender: true,
+                    status: true,
                     major: {
                         select: {
                             name: true,
                             faculty: {
                                 select: {
                                     name: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     });
 
     const genderCount = {
@@ -113,7 +114,10 @@ teacherModels.getConsultedStudent = async (teacherId) => {
         female: 0
     };
 
+    let totalStudents = 0;
+
     students.forEach(teacher => {
+        totalStudents += teacher.student.length;
         teacher.student.forEach(student => {
             if (student.gender === 'MALE') {
                 genderCount.male += 1;
@@ -123,9 +127,30 @@ teacherModels.getConsultedStudent = async (teacherId) => {
         });
     });
 
+    const statusCount = {
+        active: 0,
+        inactive: 0,
+        graduated: 0
+    };
+
+
+    students.forEach(teacher => {
+        teacher.student.forEach(student => {
+            if (student.status === 'ACTIVE') {
+                statusCount.active += 1;
+            } else if (student.gender === 'INACTIVE') {
+                statusCount.inactive += 1;
+            } else {
+                statusCount.graduated += 1;
+            }
+        });
+    });
+
     return {
-        students, 
-        genderCount 
+        students,
+        genderCount,
+        totalStudents,
+        statusCount,
     };
 };
 teacherModels.getEnrollRequest = async (teacherId) => {
@@ -134,8 +159,10 @@ teacherModels.getEnrollRequest = async (teacherId) => {
             teacherId: teacherId
         },
         select: {
+            id: true,
             courseCode: true,
             courseName: true,
+            section: true,
             enrollments: {
                 select: {
                     id: true,
@@ -149,11 +176,11 @@ teacherModels.getEnrollRequest = async (teacherId) => {
                             firstName: true,
                             lastName: true,
                             phone: true
-                        }
-                    }
-                }
-            }
-        }
+                        },
+                    },
+                },
+            },
+        },
     });
 };
 teacherModels.getSectionRequest = async (teacherId) => {
@@ -168,12 +195,14 @@ teacherModels.getSectionRequest = async (teacherId) => {
             phone: true,
             sectionChangeRequest: {
                 select: {
+                    id: true,
                     requestedAt: true,
                     status: true,
                     currentSection: true,
                     newSection: true,
                     student: {
                         select: {
+                            id: true,
                             studentId: true,
                             email: true,
                             firstName: true,
@@ -204,15 +233,15 @@ teacherModels.getSectionRequest = async (teacherId) => {
                                     faculty: {
                                         select: {
                                             name: true
-                                        }
-                                    }
-                                }
-                            }
+                                        },
+                                    },
+                                },
+                            },
                         },
-                    }
-                }
-            }
-        }
+                    },
+                },
+            },
+        },
     });
 };
 teacherModels.sendRequestChange = async (teacherId, fieldToChange, newValue) => {
