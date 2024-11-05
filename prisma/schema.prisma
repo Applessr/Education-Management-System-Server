@@ -78,49 +78,49 @@ enum StudentStatus {
 
 model Course {
   id                   Int                    @id @default(autoincrement())
-  courseCode           Int                    @map("course_code")
+  courseCode           String                 @unique @map("course_code")
   courseName           String                 @map("course_name")
   credits              Int
   seat                 Int
   section              Int
   status               Boolean                @default(true)
-  teacherId            Int?
+  teacherId            Int?                   @map("teacher_id")
   teacher              Employee?              @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   courseSyllabusId     Int?
   courseSyllabus       CourseSyllabus?        @relation(fields: [courseSyllabusId], references: [id], onDelete: Cascade)
-  majorId              Int
+  majorId              Int                    @map("major_id")
   major                Major                  @relation(fields: [majorId], references: [id], onDelete: Cascade)
   classSchedules       ClassSchedule[]
   enrollments          Enrollment[]
   grades               Grade[]
   announcements        Announcement[]
-  conditionCourse      ConditionCourse[]      @relation("PrerequisiteCourse")
+  prerequisites        ConditionCourse[]      @relation("PrerequisiteCourses")
   sectionChangeRequest SectionChangeRequest[]
   examSchedule         ExamSchedule[]
-  ConditionCourse      ConditionCourse[]
+  ConditionCourse      ConditionCourse[]      @relation("ConditionedCourses")
 
   @@unique([courseCode, section])
 }
 
 model ConditionCourse {
-  id                   Int     @id @default(autoincrement())
-  courseId             Int // The course that has a prerequisite
-  courses              Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  facultyId            Int
-  faculty              Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
-  majorId              Int
-  major                Major   @relation(fields: [majorId], references: [id], onDelete: Cascade)
-  prerequisiteCourseId Int
-  prerequisiteCourse   Course  @relation("PrerequisiteCourse", fields: [prerequisiteCourseId], references: [id], onDelete: Cascade)
+  id                     Int      @id @default(autoincrement())
+  courseCourse           String   @map("course_course")
+  course                 Course   @relation("ConditionedCourses", fields: [courseCourse], references: [courseCode])
+  facultyId              Int?     @map("faculty_id")
+  faculty                Faculty? @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  majorId                Int?     @map("major_id")
+  major                  Major?   @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  prerequisiteCourseCode String   @map("prerequisite_courseCode")
+  prerequisiteCourse     Course   @relation("PrerequisiteCourses", fields: [prerequisiteCourseCode], references: [courseCode])
 }
 
 model ClassSchedule {
   id        Int    @id @default(autoincrement())
   day       String
-  startTime String
-  endTime   String
+  startTime String @map("start_time")
+  endTime   String @map("end_time")
   room      String
-  courseId  Int
+  courseId  Int    @map("cour_id")
   course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
@@ -129,9 +129,9 @@ model Enrollment {
   status           EnrollmentStatus @default(PENDING)
   registrationDate DateTime         @default(now())
   semester         String
-  studentId        Int
+  studentId        Int              @map("student_id")
   student          Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  courseId         Int
+  courseId         Int              @map("course_id")
   course           Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
@@ -146,6 +146,7 @@ model Payment {
   id          Int           @id @default(autoincrement())
   totalCredit Int           @map("total_credit")
   amount      Float
+  semester    String
   status      PayMentStatus @default(PENDING)
   studentId   Int           @map("student_id")
   student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -200,7 +201,8 @@ model Faculty {
 model Major {
   id                   Int               @id @default(autoincrement())
   name                 String
-  facultyId            Int
+  tuitionFee           Float?            @map("tuituion_fee")
+  facultyId            Int               @map("faculty_id")
   faculty              Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
   courses              Course[]
   students             Student[]
@@ -230,13 +232,13 @@ model SectionChangeRequest {
   id             Int           @id @default(autoincrement())
   requestedAt    DateTime      @default(now())
   status         RequestStatus @default(PENDING)
-  studentId      Int
+  studentId      Int           @map("student_id")
   student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  courseId       Int
+  courseId       Int           @map("course_id")
   course         Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   currentSection Int
   newSection     Int
-  teacherId      Int
+  teacherId      Int           @map("teacher_id")
   teacher        Employee      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 }
 
@@ -250,22 +252,22 @@ model InfoChangeRequest {
   id            Int           @id @default(autoincrement())
   requestedAt   DateTime      @default(now())
   status        RequestStatus @default(PENDING)
-  studentId     Int?
+  studentId     Int?          @map("student_id")
   student       Student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  fieldToChange String
-  newValue      String
+  fieldToChange String        @map("field_to_change")
+  newValue      String        @map("new_value")
   employeeId    Int?
   employee      Employee?     @relation(fields: [employeeId], references: [id])
 }
 
 model ExamSchedule {
   id        Int      @id @default(autoincrement())
-  examDate  DateTime
-  startTime String
-  endTime   String
+  examDate  DateTime @map("exam_date")
+  startTime String   @map("start_time")
+  endTime   String   @map("end_time")
   room      String
-  examType  ExamType
-  courseId  Int
+  examType  ExamType @map("exam_type")
+  courseId  Int      @map("course_id")
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
