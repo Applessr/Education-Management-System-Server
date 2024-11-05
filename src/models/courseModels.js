@@ -70,7 +70,7 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
                     }
                 }
             },
-            
+
             enrollments: {
                 where: {
                     status: 'APPROVED',
@@ -348,28 +348,37 @@ courseModels.studentGetClassScheduleBySemester = async (studentId, semester) => 
     });
 };
 courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
-
     const prerequisites = await prisma.conditionCourse.findMany({
         where: { courseId },
-        select: { courses: true },
+        select: {
+            course: {
+                select: {
+                    id: true,
+                    courseCode: true,
+                }
+            }
+        },
     });
 
     if (prerequisites.length > 0) {
+        const prerequisiteCourseIds = prerequisites.map((prerequisite) => prerequisite.course.id);
 
-        const prerequisiteCourseIds = prerequisites.map((prerequisite) => prerequisite.courses.id);
         const completedPrerequisites = await prisma.grade.findMany({
             where: {
                 studentId: Number(studentId),
                 courseId: { in: prerequisiteCourseIds },
-                letterGrade: { not: 'F' },
+            },
+            select: {
+                letterGrade: true,
             },
         });
 
-        if (completedPrerequisites.length !== prerequisites.length) {
-            return createError(400, 'Prerequisite courses have not been completed, or a prerequisite course has a grade of F. ')
+        const hasCompletedPrerequisites = completedPrerequisites.every((grade) => grade.letterGrade !== 'F');
+
+        if (!hasCompletedPrerequisites || completedPrerequisites.length < prerequisites.length) {
+            return createError(400, 'Prerequisite courses have not been completed, or a prerequisite course has a grade of F.');
         }
     }
-
 
     return await prisma.enrollment.create({
         data: {
