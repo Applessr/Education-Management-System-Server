@@ -25,6 +25,31 @@ adminModels.overAll = async () => {
 
     const faculty = await prisma.faculty.count({});
 
+    const teacherFaculty = await prisma.faculty.findMany({
+        select: {
+            id: true,
+            name: true,
+            majors: {
+                select: {
+                    employee: {
+                        where: {
+                            employeeRole: "TEACHER"
+                        },
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const facultyTeacherCount = teacherFaculty.map(faculty => ({
+        facultyId: faculty.id,
+        facultyName: faculty.name,
+        teacherCount: faculty.majors.reduce((sum, major) => sum + (major.employee ? major.employee.length : 0), 0)
+    }));
+
     const major = await prisma.major.count({});
 
     const uniqueCourses = await prisma.course.findMany({
@@ -40,18 +65,19 @@ adminModels.overAll = async () => {
         where: {
             status: 'ACTIVE'
         }
-    })
+    });
 
     const maleStudent = await prisma.student.count({
         where: {
             gender: 'MALE'
         }
-    })
+    });
+
     const femaleStudent = await prisma.student.count({
         where: {
             gender: 'FEMALE'
         }
-    })
+    });
 
     return {
         teacher,
@@ -61,7 +87,8 @@ adminModels.overAll = async () => {
         student,
         maleStudent,
         femaleStudent,
-    }
+        facultyTeacherCount,
+    };
 };
 adminModels.findPhone = async (phone) => {
     return await prisma.employee.findUnique({
