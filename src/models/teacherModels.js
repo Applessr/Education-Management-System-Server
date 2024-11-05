@@ -160,6 +160,7 @@ teacherModels.getEnrollRequest = async (teacherId) => {
         },
         select: {
             id: true,
+            section: true,
             courseCode: true,
             courseName: true,
             section: true,

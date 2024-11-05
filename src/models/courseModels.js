@@ -191,10 +191,8 @@ courseModels.activeCourse = async (courseId) => {
     });
 };
 courseModels.studentGetCourseSyllabus = async (studentId) => {
-    return await prisma.student.findUnique({
-        where: {
-            id: studentId
-        },
+    const student = await prisma.student.findUnique({
+        where: { id: studentId },
         select: {
             id: true,
             studentId: true,
@@ -206,10 +204,7 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
                     id: true,
                     name: true,
                     faculty: {
-                        select: {
-                            id: true,
-                            name: true
-                        }
+                        select: { id: true, name: true }
                     },
                     courseRecommendation: {
                         select: {
@@ -230,6 +225,47 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
             }
         }
     });
+
+    if (!student || !student.major || !student.major.courseRecommendation) {
+        return null;
+    }
+
+    const sortedRecommendations = student.major.courseRecommendation.sort((a, b) => a.id - b.id);
+
+    const coursesGroupedByYear = {};
+    const uniqueCourses = new Map();
+
+    sortedRecommendations.forEach(rec => {
+        rec.course.forEach(course => {
+            if (!uniqueCourses.has(course.courseCode)) {
+                uniqueCourses.set(course.courseCode, {
+                    ...course,
+                    recommendationType: rec.recommendationType
+                });
+
+                if (!coursesGroupedByYear[rec.year]) {
+                    coursesGroupedByYear[rec.year] = {
+                        REQUIRED: [],
+                        ELECTIVE: []
+                    };
+                }
+
+                if (rec.recommendationType === 'REQUIRED') {
+                    coursesGroupedByYear[rec.year].REQUIRED.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'ELECTIVE') {
+                    coursesGroupedByYear[rec.year].ELECTIVE.push(uniqueCourses.get(course.courseCode));
+                }
+            }
+        });
+    });
+
+    return {
+        ...student,
+        major: {
+            ...student.major,
+            courseRecommendation: coursesGroupedByYear
+        }
+    };
 };
 courseModels.studentGetEnrollCourse = async (studentId) => {
     return await prisma.student.findUnique({
