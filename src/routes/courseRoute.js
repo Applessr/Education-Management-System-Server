@@ -8,6 +8,9 @@ const courseRouter = express.Router()
 
 courseRouter.get('/single-course/:courseId', courseController.getCourseById)
 courseRouter.get('/all-course', courseController.getAllCourse)
+courseRouter.get('/all-major', courseController.getAllMajor)
+courseRouter.get('/major/:facultyId', courseController.getMajorByFaculty)
+courseRouter.get('/all-faculty', courseController.getAllFaculty)
 
 //employee
 courseRouter.post('/employee/create-course', authenticate, courseController.createCourse)

@@ -135,7 +135,9 @@ adminController.courseSyllabus = async (req, res, next) => {
             return createError(400, 'majorId is require')
         }
 
-        const courseSyllabus = await adminServices.courseSyllabus(majorId);
+        const { year } = req.query;
+
+        const courseSyllabus = await adminServices.courseSyllabus(majorId, year);
         if (!courseSyllabus) {
             return createError(404, 'No information found')
         }

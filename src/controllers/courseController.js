@@ -1,3 +1,4 @@
+const { faculty } = require("../configs/prisma");
 const courseServices = require("../services/courseServices");
 const createError = require("../utils/create-error");
 
@@ -13,6 +14,39 @@ courseController.getAllCourse = async (req, res, next) => {
         const allCourse = await courseServices.getAllCourse(searchTerm, semester);
 
         res.status(200).json(allCourse);
+    } catch (error) {
+        console.log('Error from getAllCourse', error);
+        next(error);
+    }
+};
+courseController.getAllMajor = async (req, res, next) => {
+    try {
+
+        const allMajor = await courseServices.getAllMajor();
+
+        res.status(200).json(allMajor);
+    } catch (error) {
+        console.log('Error from getAllCourse', error);
+        next(error);
+    }
+};
+courseController.getMajorByFaculty = async (req, res, next) => {
+    try {
+        const { facultyId } = req.params
+        const allMajor = await courseServices.getMajorByFaculty(facultyId);
+
+        res.status(200).json(allMajor);
+    } catch (error) {
+        console.log('Error from getAllCourse', error);
+        next(error);
+    }
+};
+courseController.getAllFaculty = async (req, res, next) => {
+    try {
+
+        const allFaculty = await courseServices.getAllFaculty();
+
+        res.status(200).json(allFaculty);
     } catch (error) {
         console.log('Error from getAllCourse', error);
         next(error);

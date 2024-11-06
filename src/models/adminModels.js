@@ -90,7 +90,7 @@ adminModels.overAll = async () => {
         facultyTeacherCount,
     };
 };
-adminModels.courseSyllabus = async (majorId) => {
+adminModels.courseSyllabus = async (majorId, year) => {
     const courseSyllabus = await prisma.major.findUnique({
         where: {
             id: Number(majorId),
@@ -98,6 +98,12 @@ adminModels.courseSyllabus = async (majorId) => {
         select: {
             id: true,
             name: true,
+            faculty: {
+                select: {
+                    id: true,
+                    name: true
+                }
+            },
             courseRecommendation: {
                 select: {
                     id: true,
@@ -109,6 +115,11 @@ adminModels.courseSyllabus = async (majorId) => {
                             courseCode: true,
                             courseName: true,
                             credits: true,
+                            ConditionCourse: {
+                                select: {
+                                    prerequisiteCourseCode: true,
+                                }
+                            }
                         }
                     }
                 }
@@ -120,7 +131,12 @@ adminModels.courseSyllabus = async (majorId) => {
         return null;
     }
 
-    const sortedRecommendations = courseSyllabus.courseRecommendation.sort((a, b) => a.id - b.id);
+    const filteredRecommendations = year
+        ? courseSyllabus.courseRecommendation.filter(rec => rec.year.toString().slice(-1) === year.toString().slice(-1))
+        : courseSyllabus.courseRecommendation;
+
+    const sortedRecommendations = filteredRecommendations.sort((a, b) => a.id - b.id);
+
     const coursesGroupedByYear = {};
     const uniqueCourses = new Map();
 
@@ -129,7 +145,8 @@ adminModels.courseSyllabus = async (majorId) => {
             if (!uniqueCourses.has(course.courseCode)) {
                 uniqueCourses.set(course.courseCode, {
                     ...course,
-                    recommendationType: rec.recommendationType
+                    recommendationType: rec.recommendationType,
+                    prerequisites: course.ConditionCourse.map(condition => condition.prerequisiteCourseCode)
                 });
 
                 if (!coursesGroupedByYear[rec.year]) {
@@ -155,7 +172,8 @@ adminModels.courseSyllabus = async (majorId) => {
         major: {
             id: courseSyllabus.id,
             name: courseSyllabus.name,
-            courseRecommendation: coursesGroupedByYear
+            courseRecommendation: coursesGroupedByYear,
+            faculty: courseSyllabus.faculty.name
         }
     };
 };

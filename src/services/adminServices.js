@@ -13,8 +13,8 @@ adminServices.overAll = async () => {
     return await adminModels.overAll()
 };
 
-adminServices.courseSyllabus = async (majorId) => {
-    return await adminModels.courseSyllabus(majorId)
+adminServices.courseSyllabus = async (majorId, year) => {
+    return await adminModels.courseSyllabus(majorId, year)
 };
 
 adminServices.getEmployeePhone = async (phone) => {

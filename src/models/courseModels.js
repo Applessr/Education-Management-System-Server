@@ -125,6 +125,19 @@ courseModels.getCourseById = async (courseId) => {
         }
     });
 };
+courseModels.getAllMajor = async () => {
+    return await prisma.major.findMany({});
+};
+courseModels.getMajorByFaculty = async (facultyId) => {
+    return await prisma.major.findMany({
+        where: {
+            facultyId: Number(facultyId)
+        }
+    });
+};
+courseModels.getAllFaculty = async () => {
+    return await prisma.faculty.findMany({});
+};
 courseModels.getCourseByCode = async (courseCode) => {
     return await prisma.course.getCourseByCode({
         where: {
