@@ -245,15 +245,18 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
 
                 if (!coursesGroupedByYear[rec.year]) {
                     coursesGroupedByYear[rec.year] = {
-                        REQUIRED: [],
-                        ELECTIVE: []
+                        PREREQUISITES: [],
+                        OPTIONAL: [],
+                        SELECTION: []
                     };
                 }
 
-                if (rec.recommendationType === 'REQUIRED') {
-                    coursesGroupedByYear[rec.year].REQUIRED.push(uniqueCourses.get(course.courseCode));
-                } else if (rec.recommendationType === 'ELECTIVE') {
-                    coursesGroupedByYear[rec.year].ELECTIVE.push(uniqueCourses.get(course.courseCode));
+                if (rec.recommendationType === 'PREREQUISITES') {
+                    coursesGroupedByYear[rec.year].PREREQUISITES.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'OPTIONAL') {
+                    coursesGroupedByYear[rec.year].OPTIONAL.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'SELECTION') {
+                    coursesGroupedByYear[rec.year].SELECTION.push(uniqueCourses.get(course.courseCode));
                 }
             }
         });
