@@ -287,7 +287,7 @@ adminController.changeStudentStatus = async (req, res, next) => {
         }
 
         const { studentId } = req.params
-        if (studentId) {
+        if (!studentId) {
             return createError(400, 'studentId is require')
         }
 
@@ -312,7 +312,7 @@ adminController.changeStudentInfo = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
         const { studentId } = req.params
-        if (studentId) {
+        if (!studentId) {
             return createError(400, 'studentId is require')
         }
 
