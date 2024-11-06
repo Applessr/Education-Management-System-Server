@@ -363,7 +363,7 @@ adminController.changeEmployeeInfo = async (req, res, next) => {
         }
 
         const { employeeId } = req.params
-        if (employeeId) {
+        if (!employeeId) {
             return createError(400, 'employeeId is require')
         }
 
@@ -410,9 +410,9 @@ adminController.inactiveEmployee = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
 
-        const { employeeId } = req.body
+        const { employeeId } = req.params  // Changed from req.body to req.params
         if (!employeeId) {
-            return createError(400, 'All field is require')
+            return createError(400, 'Employee ID is required')
         }
         const employee = await adminServices.getEmployeeById(employeeId);
         console.log(employee)
@@ -436,9 +436,9 @@ adminController.activeEmployee = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
 
-        const { employeeId } = req.body
+        const { employeeId } = req.params  // Changed from req.body to req.params
         if (!employeeId) {
-            return createError(400, 'All field is require')
+            return createError(400, 'Employee ID is required')
         }
         const employee = await adminServices.getEmployeeById(employeeId);
         console.log(employee)

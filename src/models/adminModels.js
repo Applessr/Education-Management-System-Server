@@ -238,8 +238,24 @@ adminModels.getAllStudent = async () => {
         }
     });
 };
+// adminModels.getAllEmployee = async () => {
+//     return await prisma.employee.findMany({});
+// };
+
 adminModels.getAllEmployee = async () => {
-    return await prisma.employee.findMany({});
+    return await prisma.employee.findMany({
+        include: {
+            major: {
+                include: {
+                    faculty: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            }
+        }
+    });
 };
 adminModels.getRequestInfo = async () => {
     return await prisma.infoChangeRequest.findMany({
@@ -341,7 +357,7 @@ adminModels.changeEmployeeInfo = async (employeeId, updatedData) => {
 adminModels.inactiveEmployee = async (employeeId) => {
     return await prisma.employee.update({
         where: {
-            id: employeeId,
+            id: parseInt(employeeId),
         },
         data: {
             active: false
@@ -351,7 +367,7 @@ adminModels.inactiveEmployee = async (employeeId) => {
 adminModels.activeEmployee = async (employeeId) => {
     return await prisma.employee.update({
         where: {
-            id: employeeId,
+            id: parseInt(employeeId),
         },
         data: {
             active: true
