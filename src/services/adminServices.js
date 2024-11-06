@@ -13,6 +13,10 @@ adminServices.overAll = async () => {
     return await adminModels.overAll()
 };
 
+adminServices.courseSyllabus = async (majorId) => {
+    return await adminModels.courseSyllabus(majorId)
+};
+
 adminServices.getEmployeePhone = async (phone) => {
     return await adminModels.findPhone(phone)
 };

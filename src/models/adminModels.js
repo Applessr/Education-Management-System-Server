@@ -90,6 +90,75 @@ adminModels.overAll = async () => {
         facultyTeacherCount,
     };
 };
+adminModels.courseSyllabus = async (majorId) => {
+    const courseSyllabus = await prisma.major.findUnique({
+        where: {
+            id: Number(majorId),
+        },
+        select: {
+            id: true,
+            name: true,
+            courseRecommendation: {
+                select: {
+                    id: true,
+                    year: true,
+                    recommendationType: true,
+                    course: {
+                        select: {
+                            id: true,
+                            courseCode: true,
+                            courseName: true,
+                            credits: true,
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (!courseSyllabus || !courseSyllabus.courseRecommendation) {
+        return null;
+    }
+
+    const sortedRecommendations = courseSyllabus.courseRecommendation.sort((a, b) => a.id - b.id);
+    const coursesGroupedByYear = {};
+    const uniqueCourses = new Map();
+
+    sortedRecommendations.forEach(rec => {
+        rec.course.forEach(course => {
+            if (!uniqueCourses.has(course.courseCode)) {
+                uniqueCourses.set(course.courseCode, {
+                    ...course,
+                    recommendationType: rec.recommendationType
+                });
+
+                if (!coursesGroupedByYear[rec.year]) {
+                    coursesGroupedByYear[rec.year] = {
+                        PREREQUISITES: [],
+                        OPTIONAL: [],
+                        SELECTION: []
+                    };
+                }
+
+                if (rec.recommendationType === 'PREREQUISITES') {
+                    coursesGroupedByYear[rec.year].PREREQUISITES.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'OPTIONAL') {
+                    coursesGroupedByYear[rec.year].OPTIONAL.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'SELECTION') {
+                    coursesGroupedByYear[rec.year].SELECTION.push(uniqueCourses.get(course.courseCode));
+                }
+            }
+        });
+    });
+
+    return {
+        major: {
+            id: courseSyllabus.id,
+            name: courseSyllabus.name,
+            courseRecommendation: coursesGroupedByYear
+        }
+    };
+};
 adminModels.findPhone = async (phone) => {
     return await prisma.employee.findUnique({
         where: {
