@@ -106,7 +106,7 @@ adminModels.createEmployee = async (data) => {
 adminModels.findStudentId = async (studentId) => {
     return await prisma.student.findUnique({
         where: {
-            id: studentId
+            id: Number(studentId)
         }
     })
 };
@@ -219,7 +219,7 @@ adminModels.getRequestInfoById = async (requestId) => {
 adminModels.changeStudentStatus = async (studentId, status) => {
     return await prisma.student.update({
         where: {
-            id: studentId,
+            id: Number(studentId),
         },
         data: {
             status: status

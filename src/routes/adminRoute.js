@@ -14,8 +14,8 @@ adminRouter.get('/over-all', adminController.overAll);
 adminRouter.get('/student', adminController.getAllStudent)
 adminRouter.get('/student/:studentId', adminController.getStudentById)
 
-adminRouter.patch('/student-status', adminController.changeStudentStatus)
-adminRouter.patch('/student-change-info', adminController.changeStudentInfo)
+adminRouter.patch('/student-status/:studentId', adminController.changeStudentStatus)// adminRouter.patch('/student-change-info', adminController.changeStudentInfo)
+adminRouter.patch('/student-change-info/:studentId', adminController.changeStudentInfo)
 //employee
 adminRouter.get('/employee', adminController.getAllEmployee)
 adminRouter.get('/employee/:employeeId', adminController.getEmployeeById)
