@@ -11,7 +11,7 @@ authServices.findEmployeeById = async (employeeId) => {
 authServices.findStudent = async (identifier) => {
     return await authModels.findStudent(identifier)
 };
-authServices.findStudentById= async (studentId) => {
+authServices.findStudentById = async (studentId) => {
     return await authModels.findStudentById(studentId)
 };
 authServices.findEmployeeGoogleId = async (googleId) => {
@@ -32,8 +32,8 @@ authServices.updateResetPassword = async (email, token, expiryDate) => {
 authServices.updatePassword = async (employeeId, hashedPassword) => {
     return await authModels.updatePassword(employeeId, hashedPassword)
 };
-authServices.currentUser = async (userId) => {
-    return await authModels.currentUser(userId)
+authServices.currentUser = async (userId, firstName) => {
+    return await authModels.currentUser(userId, firstName)
 };
 
 module.exports = authServices;

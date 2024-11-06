@@ -70,7 +70,7 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
                     }
                 }
             },
-            
+
             enrollments: {
                 where: {
                     status: 'APPROVED',
@@ -245,15 +245,18 @@ courseModels.studentGetCourseSyllabus = async (studentId) => {
 
                 if (!coursesGroupedByYear[rec.year]) {
                     coursesGroupedByYear[rec.year] = {
-                        REQUIRED: [],
-                        ELECTIVE: []
+                        PREREQUISITES: [],
+                        OPTIONAL: [],
+                        SELECTION: []
                     };
                 }
 
-                if (rec.recommendationType === 'REQUIRED') {
-                    coursesGroupedByYear[rec.year].REQUIRED.push(uniqueCourses.get(course.courseCode));
-                } else if (rec.recommendationType === 'ELECTIVE') {
-                    coursesGroupedByYear[rec.year].ELECTIVE.push(uniqueCourses.get(course.courseCode));
+                if (rec.recommendationType === 'PREREQUISITES') {
+                    coursesGroupedByYear[rec.year].PREREQUISITES.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'OPTIONAL') {
+                    coursesGroupedByYear[rec.year].OPTIONAL.push(uniqueCourses.get(course.courseCode));
+                } else if (rec.recommendationType === 'SELECTION') {
+                    coursesGroupedByYear[rec.year].SELECTION.push(uniqueCourses.get(course.courseCode));
                 }
             }
         });
@@ -348,28 +351,37 @@ courseModels.studentGetClassScheduleBySemester = async (studentId, semester) => 
     });
 };
 courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
-
     const prerequisites = await prisma.conditionCourse.findMany({
         where: { courseId },
-        select: { courses: true },
+        select: {
+            course: {
+                select: {
+                    id: true,
+                    courseCode: true,
+                }
+            }
+        },
     });
 
     if (prerequisites.length > 0) {
+        const prerequisiteCourseIds = prerequisites.map((prerequisite) => prerequisite.course.id);
 
-        const prerequisiteCourseIds = prerequisites.map((prerequisite) => prerequisite.courses.id);
         const completedPrerequisites = await prisma.grade.findMany({
             where: {
                 studentId: Number(studentId),
                 courseId: { in: prerequisiteCourseIds },
-                letterGrade: { not: 'F' },
+            },
+            select: {
+                letterGrade: true,
             },
         });
 
-        if (completedPrerequisites.length !== prerequisites.length) {
-            return createError(400, 'Prerequisite courses have not been completed, or a prerequisite course has a grade of F. ')
+        const hasCompletedPrerequisites = completedPrerequisites.every((grade) => grade.letterGrade !== 'F');
+
+        if (!hasCompletedPrerequisites || completedPrerequisites.length < prerequisites.length) {
+            return createError(400, 'Prerequisite courses have not been completed, or a prerequisite course has a grade of F.');
         }
     }
-
 
     return await prisma.enrollment.create({
         data: {

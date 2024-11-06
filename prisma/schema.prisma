@@ -78,7 +78,7 @@ enum StudentStatus {
 
 model Course {
   id                   Int                    @id @default(autoincrement())
-  courseCode           String                 @unique @map("course_code")
+  courseCode           String                 @map("course_code")
   courseName           String                 @map("course_name")
   credits              Int
   seat                 Int
@@ -94,24 +94,22 @@ model Course {
   enrollments          Enrollment[]
   grades               Grade[]
   announcements        Announcement[]
-  prerequisites        ConditionCourse[]      @relation("PrerequisiteCourses")
   sectionChangeRequest SectionChangeRequest[]
   examSchedule         ExamSchedule[]
-  ConditionCourse      ConditionCourse[]      @relation("ConditionedCourses")
+  ConditionCourse      ConditionCourse[]
 
   @@unique([courseCode, section])
 }
 
 model ConditionCourse {
   id                     Int      @id @default(autoincrement())
-  courseCourse           String   @map("course_course")
-  course                 Course   @relation("ConditionedCourses", fields: [courseCourse], references: [courseCode])
+  courseId               Int      @map("course_id")
+  course                 Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   facultyId              Int?     @map("faculty_id")
   faculty                Faculty? @relation(fields: [facultyId], references: [id], onDelete: Cascade)
   majorId                Int?     @map("major_id")
   major                  Major?   @relation(fields: [majorId], references: [id], onDelete: Cascade)
   prerequisiteCourseCode String   @map("prerequisite_courseCode")
-  prerequisiteCourse     Course   @relation("PrerequisiteCourses", fields: [prerequisiteCourseCode], references: [courseCode])
 }
 
 model ClassSchedule {

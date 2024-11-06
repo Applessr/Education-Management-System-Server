@@ -90,10 +90,11 @@ authModels.updatePassword = async (employeeId, hashedPassword) => {
         },
     });
 };
-authModels.currentUser = async (userId) => {
+authModels.currentUser = async (userId, firstName) => {
     const student = await prisma.student.findUnique({
         where: {
             id: userId,
+            firstName
         },
     });
 
@@ -107,10 +108,16 @@ authModels.currentUser = async (userId) => {
     const employee = await prisma.employee.findUnique({
         where: {
             id: userId,
+            firstName
         },
     });
 
-    return employee || null;
-};
+    if (employee) {
+        return {
+            ...employee,
+        };
+    }
 
+    return null;
+};
 module.exports = authModels;

@@ -218,18 +218,25 @@ authController.resetPassword = async (req, res, next) => {
 authController.currentUser = async (req, res, next) => {
     try {
         const userId = req.user.id
+        const firstName = req.user.firstName
+
+        console.log('req.user :>> ', req.user);
+
         if (!userId) {
             return createError(400, 'Check token expired date')
         }
+        if (!firstName) {
+            return createError(400, 'Check token expired date')
+        }
 
-        const currentUser = await authServices.currentUser(userId);
+        const currentUser = await authServices.currentUser(userId, firstName);
         if (!currentUser) {
             return createError(404, 'User not found');
         }
         delete currentUser.password;
         res.status(200).json(currentUser);
     } catch (error) {
-        console.log('error from resetPassword', error);
+        console.log('error from currentUser', error);
         next(error);
     }
 }
