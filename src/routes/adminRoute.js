@@ -21,6 +21,8 @@ adminRouter.get('/teacher', adminController.getAllEmployee)
 adminRouter.get('/teacher/:teacherId', adminController.getEmployeeById)
 
 adminRouter.patch('/employee-change-info/:employeeId', adminController.changeEmployeeInfo)
+// adminRouter.patch('/employee-active', adminController.activeEmployee)
+// adminRouter.patch('/employee-inactive', adminController.inactiveEmployee)
 adminRouter.patch('/employee-active/:employeeId', adminController.activeEmployee)
 adminRouter.patch('/employee-inactive/:employeeId', adminController.inactiveEmployee)
 //request
