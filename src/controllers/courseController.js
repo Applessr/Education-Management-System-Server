@@ -1,3 +1,4 @@
+const { faculty } = require("../configs/prisma");
 const courseServices = require("../services/courseServices");
 const createError = require("../utils/create-error");
 
@@ -18,10 +19,62 @@ courseController.getAllCourse = async (req, res, next) => {
         next(error);
     }
 };
+courseController.getAllMajor = async (req, res, next) => {
+    try {
+
+        const allMajor = await courseServices.getAllMajor();
+
+        res.status(200).json(allMajor);
+    } catch (error) {
+        console.log('Error from getAllMajor', error);
+        next(error);
+    }
+};
+courseController.getMajorByFaculty = async (req, res, next) => {
+    try {
+        const { facultyId } = req.params
+        const allMajor = await courseServices.getMajorByFaculty(facultyId);
+
+        res.status(200).json(allMajor);
+    } catch (error) {
+        console.log('Error from getMajorByFaculty', error);
+        next(error);
+    }
+};
+courseController.getAllFaculty = async (req, res, next) => {
+    try {
+
+        const allFaculty = await courseServices.getAllFaculty();
+
+        res.status(200).json(allFaculty);
+    } catch (error) {
+        console.log('Error from getAllFaculty', error);
+        next(error);
+    }
+};
+courseController.teacherGetCourse = async (req, res, next) => {
+    try {
+        const teacherId = req.user.id
+        if (!teacherId) {
+            return createError(400, 'teacherId is require')
+        }
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const teacherCourse = await courseServices.teacherGetCourse(teacherId);
+
+        res.status(200).json(teacherCourse);
+    } catch (error) {
+        console.log('Error from teacherGetCourse', error);
+        next(error);
+    }
+};
 courseController.getCourseById = async (req, res, next) => {
     try {
         const { courseId } = req.params
-        console.log(courseId)
 
         const course = await courseServices.getCourseById(courseId);
 

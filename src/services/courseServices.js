@@ -7,6 +7,19 @@ const courseServices = {};
 courseServices.getAllCourse = async (searchTerm, semester) => {
     return await courseModels.getAllCourse(searchTerm, semester)
 };
+
+courseServices.getAllMajor = async () => {
+    return await courseModels.getAllMajor()
+};
+courseServices.getMajorByFaculty = async (facultyId) => {
+    return await courseModels.getMajorByFaculty(facultyId)
+};
+courseServices.getAllFaculty = async () => {
+    return await courseModels.getAllFaculty()
+};
+courseServices.teacherGetCourse = async (teacherId) => {
+    return await courseModels.teacherGetCourse(teacherId)
+};
 courseServices.getCourseById = async (courseId) => {
     return await courseModels.getCourseById(courseId)
 };

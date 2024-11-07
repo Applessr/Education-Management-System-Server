@@ -88,6 +88,31 @@ teacherController.getStudentInCourse = async (req, res, next) => {
         next(error);
     }
 };
+teacherController.getStudentInCourseById = async (req, res, next) => {
+    try {
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+        const teacherId = req.user.id
+        console.log('teacherId :>> ', teacherId);
+        if (!teacherId) {
+            return createError(400, 'Check token expired date')
+        }
+        const { courseId } = req.params
+        console.log('courseId :>> ', courseId);
+        if (!courseId) {
+            return createError(400, 'courseId is require')
+        }
+        const studentInCourse = await teacherServices.getStudentInCourseById(teacherId, courseId);
+
+        res.status(200).json(studentInCourse);
+
+    } catch (error) {
+        console.log('Error from getConsultedStudent', error)
+        next(error);
+    }
+};
 teacherController.getConsultedStudent = async (req, res, next) => {
     try {
         const { employeeRole } = req.user
