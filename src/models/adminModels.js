@@ -50,8 +50,9 @@ adminModels.overAll = async () => {
         teacherCount: faculty.majors.reduce((sum, major) => sum + (major.employee ? major.employee.length : 0), 0)
     }));
 
+    
     const major = await prisma.major.count({});
-
+    
     const uniqueCourses = await prisma.course.findMany({
         distinct: ['courseCode'],
         select: {
@@ -72,13 +73,38 @@ adminModels.overAll = async () => {
             gender: 'MALE'
         }
     });
-
+    
     const femaleStudent = await prisma.student.count({
         where: {
             gender: 'FEMALE'
         }
     });
+    const studentFaculty = await prisma.faculty.findMany({
+        select: {
+            id: true,
+            name: true,
+            majors: {
+                select: {
+                    students: {
+                        where: {
+                            status: 'ACTIVE'  // Only count active students
+                        },
+                        select: {
+                            id: true
+                        }
+                    }
+                }
+            }
+        }
+    });
 
+    // Add this new transformation for student counts
+    const facultyStudentCount = studentFaculty.map(faculty => ({
+        facultyId: faculty.id,
+        facultyName: faculty.name,
+        studentCount: faculty.majors.reduce((sum, major) => sum + (major.students ? major.students.length : 0), 0)
+    }));
+    
     return {
         teacher,
         faculty,
@@ -88,6 +114,7 @@ adminModels.overAll = async () => {
         maleStudent,
         femaleStudent,
         facultyTeacherCount,
+        facultyStudentCount  // Add this to the return object
     };
 };
 adminModels.courseSyllabus = async (majorId, year) => {
