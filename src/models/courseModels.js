@@ -138,6 +138,53 @@ courseModels.getMajorByFaculty = async (facultyId) => {
 courseModels.getAllFaculty = async () => {
     return await prisma.faculty.findMany({});
 };
+courseModels.teacherGetCourse = async (teacherId) => {
+    const courses = await prisma.course.findMany({
+        where: {
+            teacherId: Number(teacherId)
+        },
+        include: {
+            classSchedules: {
+                select: {
+                    day: true,
+                    startTime: true,
+                    endTime: true,
+                    room: true
+                }
+            },
+            examSchedule: {
+                select: {
+                    examDate: true,
+                    startTime: true,
+                    endTime: true,
+                    room: true,
+                    examType: true
+                }
+            },
+            enrollments: {
+                where: {
+                    status: 'APPROVED'
+                },
+                select: {
+                    id: true
+                }
+            }
+        }
+    });
+    
+    const groupByCourseCode = (courses) => {
+        return courses.reduce((acc, course) => {
+            const { courseCode } = course;
+            if (!acc[courseCode]) {
+                acc[courseCode] = [];
+            }
+            acc[courseCode].push(course);
+            return acc;
+        }, {});
+    };
+
+    return groupByCourseCode(courses);
+};
 courseModels.getCourseByCode = async (courseCode) => {
     return await prisma.course.getCourseByCode({
         where: {

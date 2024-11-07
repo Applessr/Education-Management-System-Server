@@ -11,6 +11,9 @@ teacherServices.changePassword = async (teacherId, newPassword) => {
 teacherServices.getStudentInCourse = async (teacherId) => {
     return await teacherModels.getStudentInCourse(teacherId)
 };
+teacherServices.getStudentInCourseById = async (teacherId, courseId) => {
+    return await teacherModels.getStudentInCourseById(teacherId, courseId)
+};
 teacherServices.getConsultedStudent = async (teacherId) => {
     return await teacherModels.getConsultedStudent(teacherId)
 };

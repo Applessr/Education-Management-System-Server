@@ -17,6 +17,9 @@ courseServices.getMajorByFaculty = async (facultyId) => {
 courseServices.getAllFaculty = async () => {
     return await courseModels.getAllFaculty()
 };
+courseServices.teacherGetCourse = async (teacherId) => {
+    return await courseModels.teacherGetCourse(teacherId)
+};
 courseServices.getCourseById = async (courseId) => {
     return await courseModels.getCourseById(courseId)
 };

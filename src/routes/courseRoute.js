@@ -13,6 +13,7 @@ courseRouter.get('/major/:facultyId', courseController.getMajorByFaculty)
 courseRouter.get('/all-faculty', courseController.getAllFaculty)
 
 //employee
+courseRouter.get('/teacher', authenticate, courseController.teacherGetCourse)
 courseRouter.post('/employee/create-course', authenticate, courseController.createCourse)
 courseRouter.patch('/employee/edit-course/:courseId', authenticate, courseController.editCourse)
 courseRouter.patch('/employee/inactive-course/:courseId', authenticate, courseController.inactiveCourse)

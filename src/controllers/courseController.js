@@ -26,7 +26,7 @@ courseController.getAllMajor = async (req, res, next) => {
 
         res.status(200).json(allMajor);
     } catch (error) {
-        console.log('Error from getAllCourse', error);
+        console.log('Error from getAllMajor', error);
         next(error);
     }
 };
@@ -37,7 +37,7 @@ courseController.getMajorByFaculty = async (req, res, next) => {
 
         res.status(200).json(allMajor);
     } catch (error) {
-        console.log('Error from getAllCourse', error);
+        console.log('Error from getMajorByFaculty', error);
         next(error);
     }
 };
@@ -48,14 +48,33 @@ courseController.getAllFaculty = async (req, res, next) => {
 
         res.status(200).json(allFaculty);
     } catch (error) {
-        console.log('Error from getAllCourse', error);
+        console.log('Error from getAllFaculty', error);
+        next(error);
+    }
+};
+courseController.teacherGetCourse = async (req, res, next) => {
+    try {
+        const teacherId = req.user.id
+        if (!teacherId) {
+            return createError(400, 'teacherId is require')
+        }
+
+        const { employeeRole } = req.user
+        if (employeeRole !== "TEACHER") {
+            return createError(400, 'You do not have permission')
+        }
+
+        const teacherCourse = await courseServices.teacherGetCourse(teacherId);
+
+        res.status(200).json(teacherCourse);
+    } catch (error) {
+        console.log('Error from teacherGetCourse', error);
         next(error);
     }
 };
 courseController.getCourseById = async (req, res, next) => {
     try {
         const { courseId } = req.params
-        console.log(courseId)
 
         const course = await courseServices.getCourseById(courseId);
 

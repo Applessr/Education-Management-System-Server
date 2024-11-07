@@ -75,6 +75,67 @@ teacherModels.getStudentInCourse = async (teacherId) => {
         },
     });
 };
+teacherModels.getStudentInCourseById = async (teacherId, courseId) => {
+    return await prisma.course.findUnique({
+        where: {
+            id: Number(courseId),
+        },
+        select: {
+            id: true,
+            courseCode: true,
+            courseName: true,
+            section: true,
+            teacher: {
+                where: {
+                    id: Number(teacherId),
+                },
+                select: {
+                    firstName: true,
+                    lastName: true
+                }
+            },
+            classSchedules: {
+                select: {
+                    day: true,
+                    startTime: true,
+                    endTime: true,
+                    room: true,
+                },
+            },
+            enrollments: {
+                where: {
+                    status: "APPROVED",
+                },
+                select: {
+                    student: {
+                        select: {
+                            studentId: true,
+                            email: true,
+                            firstName: true,
+                            lastName: true,
+                            phone: true,
+                            grades: {
+                                select: {
+                                    totalPoint: true,
+                                },
+                            },
+                            major: {
+                                select: {
+                                    name: true,
+                                    faculty: {
+                                        select: {
+                                            name: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+};
 teacherModels.getConsultedStudent = async (teacherId) => {
     const students = await prisma.employee.findMany({
         where: {

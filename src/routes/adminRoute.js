@@ -9,7 +9,6 @@ adminRouter.post('/register-student', registerStudentValidator, adminController.
 //admin
 adminRouter.get('/profile', adminController.getSelfProfile);
 adminRouter.get('/over-all', adminController.overAll);
-adminRouter.get('/course-syllabus/:majorId', adminController.courseSyllabus);
 
 //student
 adminRouter.get('/student', adminController.getAllStudent)

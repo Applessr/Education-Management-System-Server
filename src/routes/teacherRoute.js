@@ -8,6 +8,7 @@ teacherRouter.get('/profile', teacherController.getProfile)
 teacherRouter.get('/consulted-student', teacherController.getConsultedStudent)
 teacherRouter.get('/enroll-request', teacherController.getEnrollRequest)
 teacherRouter.get('/student-course', teacherController.getStudentInCourse)
+teacherRouter.get('/student-course/:courseId', teacherController.getStudentInCourseById)
 teacherRouter.get('/request-section', teacherController.getSectionRequest)
 
 teacherRouter.post('/request-change', teacherController.sendRequestChange)
