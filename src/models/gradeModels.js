@@ -18,7 +18,8 @@ gradeModels.studentGetGrade = async (studentId) => {
                     id: true,
                     courseCode: true,
                     courseName: true,
-                    section: true
+                    section: true,
+                    credits: true
                 }
             }
         }
@@ -92,17 +93,36 @@ gradeModels.studentGetAllGPA = async (studentId) => {
     let totalGradePoints = 0;
     let totalCredits = 0;
 
-    for (const semester of semesters) {
-        const { semesterGPA, semesterCredits } = await gradeModels.studentGetGPABySemester(studentId, semester.semester);
+    if (semesters.length === 0) {
+        console.log(`No approved enrollments found for student ${studentId}`);
+        return 0; 
+    }
 
-        totalGradePoints += semesterGPA * semesterCredits;
-        totalCredits += semesterCredits;
+    for (const semester of semesters) {
+        try {
+            const { semesterGPA, semesterCredits } = await gradeModels.studentGetGPABySemesterForAll(studentId, semester.semester);
+
+            if (semesterGPA == null || semesterCredits == null) {
+                console.log(`No GPA or credits found for semester ${semester.semester} for student ${studentId}`);
+                continue; 
+            }
+
+            console.log(`Semester: ${semester.semester}, GPA: ${semesterGPA}, Credits: ${semesterCredits}`);
+
+            totalGradePoints += semesterGPA * semesterCredits;
+            totalCredits += semesterCredits;
+        } catch (error) {
+            console.error(`Error fetching GPA for semester ${semester.semester} for student ${studentId}:`, error);
+        }
     }
 
     const averageGPA = totalCredits > 0 ? totalGradePoints / totalCredits : 0;
+
+    console.log(`Student ID: ${studentId}, Average GPA: ${averageGPA}`);
+
     return averageGPA;
 };
-gradeModels.studentGetGPABySemester = async (studentId, semester) => {
+gradeModels.studentGetGPABySemesterForAll = async (studentId, semester) => {
     const enrollments = await prisma.enrollment.findMany({
         where: {
             studentId: Number(studentId),
@@ -166,6 +186,75 @@ gradeModels.studentGetGPABySemester = async (studentId, semester) => {
     console.log(`Total Grade Points: ${totalGradePoints}, Total Credits: ${totalCredits}, Semester GPA: ${semesterGPA}`);
 
     return { semesterGPA, semesterCredits: totalCredits };
+};
+gradeModels.studentGetGPABySemester = async (studentId) => {
+
+    const enrollments = await prisma.enrollment.findMany({
+        where: {
+            studentId: Number(studentId),
+            status: 'APPROVED',
+        },
+        include: {
+            course: {
+                include: {
+                    grades: {
+                        where: {
+                            studentId: Number(studentId),
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    const gradePointMap = {
+        'A': 4.0,
+        'B+': 3.5,
+        'B': 3.0,
+        'C+': 2.5,
+        'C': 2.0,
+        'D+': 1.5,
+        'D': 1.0,
+        'F': 0.0,
+    };
+
+    const semesterData = {};
+
+    for (const enrollment of enrollments) {
+        const semester = enrollment.semester;
+        const grade = enrollment.course.grades[0];
+        const credits = enrollment.course.credits;
+
+        if (!semesterData[semester]) {
+            semesterData[semester] = {
+                totalGradePoints: 0,
+                totalCredits: 0,
+            };
+        }
+
+        if (grade && grade.letterGrade !== null) {
+            const letterGrade = grade.letterGrade;
+            const gradePoint = gradePointMap[letterGrade];
+            
+            if (gradePoint !== undefined) {
+                semesterData[semester].totalGradePoints += gradePoint * credits;
+                semesterData[semester].totalCredits += credits;
+            }
+        }
+    }
+
+    const result = Object.keys(semesterData).map((semester) => {
+        const { totalGradePoints, totalCredits } = semesterData[semester];
+        const semesterGPA = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 0;
+        
+        return {
+            semester,
+            gpa: parseFloat(semesterGPA),
+            credits: totalCredits,
+        };
+    });
+
+    return result;
 };
 gradeModels.teacherAddScore = async (studentId, courseId, semester, type, point) => {
     const gradeId = await gradeModels.findOrCreateGrade(studentId, courseId, semester);

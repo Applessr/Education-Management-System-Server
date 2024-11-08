@@ -29,8 +29,11 @@ authServices.updateEmployee = async (id, data) => {
 authServices.updateResetPassword = async (email, token, expiryDate) => {
     return await authModels.updateResetPassword(email, token, expiryDate)
 };
-authServices.updatePassword = async (employeeId, hashedPassword) => {
-    return await authModels.updatePassword(employeeId, hashedPassword)
+authServices.updateStudentPassword = async (studentId, hashedPassword) => {
+    return await authModels.updateStudentPassword(studentId, hashedPassword)
+};
+authServices.updateEmployeePassword = async (employeeId, hashedPassword) => {
+    return await authModels.updateEmployeePassword(employeeId, hashedPassword)
 };
 authServices.currentUser = async (userId, firstName) => {
     return await authModels.currentUser(userId, firstName)

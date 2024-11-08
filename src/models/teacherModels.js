@@ -1,4 +1,5 @@
 const prisma = require("../configs/prisma");
+const gradeModels = require("./gradeModels");
 
 const teacherModels = {};
 
@@ -148,6 +149,7 @@ teacherModels.getConsultedStudent = async (teacherId) => {
             phone: true,
             student: {
                 select: {
+                    id: true,
                     studentId: true,
                     email: true,
                     firstName: true,
@@ -155,6 +157,16 @@ teacherModels.getConsultedStudent = async (teacherId) => {
                     phone: true,
                     gender: true,
                     status: true,
+                    enrollments: {
+                        where: {
+                            status: "APPROVED",
+                        },
+                        select: {
+                            id: true,
+                            semester: true,
+                        },
+                        distinct: ['semester'],
+                    },
                     major: {
                         select: {
                             name: true,
@@ -170,6 +182,9 @@ teacherModels.getConsultedStudent = async (teacherId) => {
         },
     });
 
+    let totalGradePoints = 0;
+    let totalCredits = 0;
+
     const genderCount = {
         male: 0,
         female: 0
@@ -177,35 +192,39 @@ teacherModels.getConsultedStudent = async (teacherId) => {
 
     let totalStudents = 0;
 
-    students.forEach(teacher => {
-        totalStudents += teacher.student.length;
-        teacher.student.forEach(student => {
-            if (student.gender === 'MALE') {
-                genderCount.male += 1;
-            } else if (student.gender === 'FEMALE') {
-                genderCount.female += 1;
-            }
-        });
-    });
-
     const statusCount = {
         active: 0,
         inactive: 0,
         graduated: 0
     };
 
+    for (const teacher of students) {
+        for (const student of teacher.student) {
+            try {
+                const averageGPA = await gradeModels.studentGetAllGPA(student.id);
+                student.averageGPA = averageGPA;
+                console.log('averageGPA :>> ', averageGPA);
 
-    students.forEach(teacher => {
-        teacher.student.forEach(student => {
-            if (student.status === 'ACTIVE') {
-                statusCount.active += 1;
-            } else if (student.gender === 'INACTIVE') {
-                statusCount.inactive += 1;
-            } else {
-                statusCount.graduated += 1;
+                if (student.gender === 'MALE') {
+                    genderCount.male += 1;
+                } else if (student.gender === 'FEMALE') {
+                    genderCount.female += 1;
+                }
+
+                if (student.status === 'ACTIVE') {
+                    statusCount.active += 1;
+                } else if (student.status === 'INACTIVE') {
+                    statusCount.inactive += 1;
+                } else {
+                    statusCount.graduated += 1;
+                }
+
+                totalStudents++;
+            } catch (error) {
+                console.error('Error fetching GPA for student', student.studentId, error);
             }
-        });
-    });
+        }
+    }
 
     return {
         students,

@@ -2,9 +2,6 @@ const studentModels = require("../models/studentModels");
 
 const studentServices = {};
 
-studentServices.getProgress = async (userId) => {
-    return await studentModels.getProgress(userId)
-};
 studentServices.getCredit = async (userId) => {
     return await studentModels.getCredit(userId)
 };

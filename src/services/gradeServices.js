@@ -16,8 +16,8 @@ gradeServices.studentGetScore = async (studentId, courseId) => {
 gradeServices.studentGetAllGPA = async (studentId) => {
     return await gradeModels.studentGetAllGPA(studentId)
 };
-gradeServices.studentGetGPABySemester = async (studentId, semester) => {
-    return await gradeModels.studentGetGPABySemester(studentId, semester)
+gradeServices.studentGetGPABySemester = async (studentId ) => {
+    return await gradeModels.studentGetGPABySemester(studentId)
 };
 gradeServices.teacherAddScore = async (studentId, courseId, semester, type, point) => {
     return await gradeModels.teacherAddScore(studentId, courseId, semester, type, point)

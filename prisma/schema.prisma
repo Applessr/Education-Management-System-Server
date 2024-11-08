@@ -118,7 +118,7 @@ model ClassSchedule {
   startTime String @map("start_time")
   endTime   String @map("end_time")
   room      String
-  courseId  Int    @map("cour_id")
+  courseId  Int    @map("course_id")
   course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 

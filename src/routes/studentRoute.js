@@ -5,7 +5,6 @@ const studentController = require('../controllers/studentController');
 const studentRouter = express.Router()
 //http://localhost:8888/student
 studentRouter.get('/profile', studentController.getProfile)
-studentRouter.get('/progress', studentController.getProgress)
 studentRouter.get('/credit', studentController.getCredit)
 studentRouter.get('/notification', studentController.getNotification)
 studentRouter.get('/exam-date', studentController.getExamDate)
