@@ -118,8 +118,9 @@ courseController.editCourse = async (req, res, next) => {
             return createError(400, 'You do not have permission')
         }
         const { courseId } = req.params
-        const { courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId } = req.body
-        if (!(courseCode || courseName || credits || seat || section || teacherId || courseSyllabusId)) {
+        // Added classSchedules and examSchedule into the body.
+        const { courseCode, courseName, credits, seat, section, teacherId, courseSyllabusId} = req.body
+        if (!(courseCode || courseName || credits || seat || section || teacherId || courseSyllabusId || classSchedule || examSchedule)) {
             return createError(400, 'at least one field is require change')
         }
 
@@ -150,7 +151,13 @@ courseController.editCourse = async (req, res, next) => {
         if (courseSyllabusId) {
             updateCourseInfo.courseSyllabusId = courseSyllabusId;
         }
-
+        // Added classSchedules and examSchedule
+        // if (classSchedule) {
+        //     updateCourseInfo.classSchedules = classSchedule;
+        // } 
+        // if (examSchedule) {
+        //     updateCourseInfo.examSchedule = examSchedule;
+        // }
         const editCourse = await courseServices.editCourse(courseId, updateCourseInfo);
 
         res.status(200).json(editCourse);

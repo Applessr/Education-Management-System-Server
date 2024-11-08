@@ -230,6 +230,9 @@ courseModels.editCourse = async (courseId, updateCourseInfo) => {
         },
     });
 };
+
+
+
 courseModels.inactiveCourse = async (courseId) => {
     return await prisma.course.update({
         where: {
