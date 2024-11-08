@@ -2,84 +2,6 @@ const prisma = require("../configs/prisma");
 
 const studentModels = {};
 
-studentModels.getProgress = async (studentId) => {
-    const student = await prisma.student.findUnique({
-        where: {
-            id: Number(studentId),
-        },
-        select: {
-            firstName: true,
-            lastName: true,
-            major: {
-                select: {
-                    id: true,
-                    name: true,
-                    courseRecommendation: {
-                        select: {
-                            id: true,
-                            year: true,
-                            recommendationType: true,
-                            course: {
-                                select: {
-                                    id: true,
-                                    courseName: true,
-                                    grades: {
-                                        select: {
-                                            totalPoint: true,
-                                            letterGrade: true,
-                                        },
-                                    },
-                                    enrollments: {
-                                        select: {
-                                            status: true,
-                                            registrationDate: true,
-                                            semester: true,
-                                            studentId: true,
-                                            courseId: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    faculty: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    if (!student || !student.major || !student.major.courseRecommendation) {
-        throw new Error('Student or major not found');
-    }
-
-    let totalCourses = 0;
-    let completedCourses = 0;
-
-    for (const recommendation of student.major.courseRecommendation) {
-        const course = recommendation.course;
-        if (course) {
-            totalCourses++;
-
-            const enrollment = course.enrollments.find(en => en.status === 'APPROVED');
-            if (enrollment && enrollment.grade !== 'F') {
-                completedCourses++;
-            }
-        }
-    }
-
-    const progressPercentage = totalCourses > 0 ? (completedCourses / totalCourses) * 100 : 0;
-
-    return {
-        firstName: student.firstName,
-        lastName: student.lastName,
-        progress: progressPercentage
-    };
-};
 studentModels.getCredit = async (studentId) => {
     const approvedEnrollments = await prisma.enrollment.findMany({
         where: {
@@ -87,24 +9,15 @@ studentModels.getCredit = async (studentId) => {
             status: 'APPROVED',
         },
         include: {
-            course: true,
-        },
-    });
-
-    const currentCredit = approvedEnrollments.reduce((total, enrollment) => {
-        return total + enrollment.course.credits;
-    }, 0);
-
-    const student = await prisma.student.findUnique({
-        where: {
-            id: Number(studentId),
-        },
-        include: {
-            major: {
+            course: {
                 include: {
-                    courseRecommendation: {
+                    major: {
                         include: {
-                            course: true,
+                            courseRecommendation: {
+                                include: {
+                                    course: true,  // ดึงข้อมูล course มาด้วย
+                                },
+                            },
                         },
                     },
                 },
@@ -112,40 +25,64 @@ studentModels.getCredit = async (studentId) => {
         },
     });
 
-    const totalRequiredCredits = student.major.courseRecommendation.reduce(
-        (total, courseSyllabus) => {
-            return total + courseSyllabus.course.reduce((subTotal, course) => {
-                return subTotal + course.credits;
-            }, 0);
-        },
-        0
-    );
+    const currentCredit = approvedEnrollments.reduce((total, enrollment) => {
+        if (enrollment.grade !== 'F') {
+            return total + enrollment.course.credits;
+        }
+        return total;
+    }, 0);
 
-    const totalRequiredCourses = student.major.courseRecommendation.filter(
-        (courseSyllabus) => courseSyllabus.recommendationType === 'REQUIRED'
-    ).length;
+    const totalRequiredCredits = 72;
+    const totalOptionalCredits = 48;
+    const totalSelectionCredits = 24;
 
-    const totalElectiveCourses = student.major.courseRecommendation.filter(
-        (courseSyllabus) => courseSyllabus.recommendationType === 'ELECTIVE'
-    ).length;
+    const enrolledRequiredCredits = approvedEnrollments.reduce((total, enrollment) => {
+        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec =>
+            rec.course && rec.course.some(course => course.id === enrollment.course.id)
+        )?.recommendationType;
 
-    const enrolledRequiredCourses = approvedEnrollments.filter(
-        (enrollment) => enrollment.course.recommendationType === 'REQUIRED'
-    ).length;
+        if (enrollment.grade !== 'F' && recommendationType === 'PREREQUISITES') {
+            return total + enrollment.course.credits;
+        }
+        return total;
+    }, 0);
 
-    const enrolledElectiveCourses = approvedEnrollments.filter(
-        (enrollment) => enrollment.course.recommendationType === 'ELECTIVE'
-    ).length;
+    const enrolledElectiveCredits = approvedEnrollments.reduce((total, enrollment) => {
+        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec =>
+            rec.course && rec.course.some(course => course.id === enrollment.course.id)
+        )?.recommendationType;
+
+        if (enrollment.grade !== 'F' && recommendationType === 'OPTIONAL') {
+            return total + enrollment.course.credits;
+        }
+        return total;
+    }, 0);
+
+    const enrolledSelectionCredits = approvedEnrollments.reduce((total, enrollment) => {
+        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec =>
+            rec.course && rec.course.some(course => course.id === enrollment.course.id)
+        )?.recommendationType;
+
+        if (enrollment.grade !== 'F' && recommendationType === 'SELECTION') {
+            return total + enrollment.course.credits;
+        }
+        return total;
+    }, 0);
+
+    const totalCredit = totalRequiredCredits + totalOptionalCredits + totalSelectionCredits;
 
     return {
         currentCredit,
         totalRequiredCredits,
-        totalRequiredCourses,
-        totalElectiveCourses,
-        enrolledRequiredCourses,
-        enrolledElectiveCourses,
+        totalOptionalCredits,
+        totalSelectionCredits,
+        totalCredit,
+        enrolledRequiredCredits,
+        enrolledElectiveCredits,
+        enrolledSelectionCredits,
     };
 };
+
 studentModels.studentProfile = async (userId) => {
     return await prisma.student.findUnique({
         where: {
@@ -255,6 +192,18 @@ studentModels.sendRequestSection = async (userId, courseId, currentSection, newS
             newSection: newSection || null,
             teacherId: teacherId || null
         }
+    });
+};
+studentModels.createPayMent = async (amount, semester, studentId) => {
+    return await prisma.payment.create({
+        data: {
+            totalCredit: 3,
+            amount: amount,
+            semester: semester,
+            status: "PENDING",
+            studentId: studentId,
+            payDate: new Date(),
+        },
     });
 };
 

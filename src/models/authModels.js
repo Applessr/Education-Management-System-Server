@@ -78,10 +78,22 @@ authModels.updateResetPassword = async (email, token, expiryDate) => {
         },
     });
 };
-authModels.updatePassword = async (employeeId, hashedPassword) => {
+authModels.updateEmployeePassword = async (employeeId, hashedPassword) => {
     return await prisma.employee.update({
         where: {
             id: Number(employeeId)
+        },
+        data: {
+            password: hashedPassword,
+            resetPasswordToken: null,
+            resetPasswordExpires: null,
+        },
+    });
+};
+authModels.updateStudentPassword = async (studentId, hashedPassword) => {
+    return await prisma.student.update({
+        where: {
+            id: Number(studentId)
         },
         data: {
             password: hashedPassword,

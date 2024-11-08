@@ -82,14 +82,9 @@ gradeController.studentGetGPABySemester = async (req, res, next) => {
             return createError(400, 'Check token expired date');
         }
 
-        const { semester } = req.body;
-        if (!semester) {
-            return createError(400, 'semester is required');
-        }
+        const studentGPA = await gradeServices.studentGetGPABySemester(studentId);
 
-        const studentGPA = await gradeServices.studentGetGPABySemester(studentId, semester);
-
-        res.status(200).json({ gpa: studentGPA });
+        res.status(200).json({ GPA: studentGPA });
     } catch (error) {
         console.log('Error from studentGetGPABySemester', error);
         next(error);
