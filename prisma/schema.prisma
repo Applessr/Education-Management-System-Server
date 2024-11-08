@@ -113,13 +113,13 @@ model ConditionCourse {
 }
 
 model ClassSchedule {
-  id        Int    @id @default(autoincrement())
-  day       String
-  startTime String @map("start_time")
-  endTime   String @map("end_time")
+  id        Int      @id @default(autoincrement())
+  day       Int
+  startTime DateTime @map("start_time") @db.Time()
+  endTime   DateTime @map("end_time") @db.Time()
   room      String
-  courseId  Int    @map("cour_id")
-  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  Int      @map("cour_id")
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
 model Enrollment {
@@ -261,8 +261,8 @@ model InfoChangeRequest {
 model ExamSchedule {
   id        Int      @id @default(autoincrement())
   examDate  DateTime @map("exam_date")
-  startTime String   @map("start_time")
-  endTime   String   @map("end_time")
+  startTime DateTime @map("start_time") @db.Time()
+  endTime   DateTime @map("end_time") @db.Time()
   room      String
   examType  ExamType @map("exam_type")
   courseId  Int      @map("course_id")
@@ -272,4 +272,15 @@ model ExamSchedule {
 enum ExamType {
   MIDTERM
   FINAL
+}
+
+model CourseNode {
+  id        Int @id @default(autoincrement())
+  positionX Int @map("position_x")
+  positionY Int @map("position_y")
+}
+
+model CourseLine {
+  id Int @id @default(autoincrement())
+  
 }
