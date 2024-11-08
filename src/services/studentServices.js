@@ -2,9 +2,6 @@ const studentModels = require("../models/studentModels");
 
 const studentServices = {};
 
-studentServices.getProgress = async (userId) => {
-    return await studentModels.getProgress(userId)
-};
 studentServices.getCredit = async (userId) => {
     return await studentModels.getCredit(userId)
 };
@@ -25,5 +22,8 @@ studentServices.sendRequestChange = async (userId, fieldToChange, newValue) => {
 };
 studentServices.sendRequestSection = async (userId, courseId, currentSection, newSection, teacherId) => {
     return await studentModels.sendRequestSection(userId, courseId, currentSection, newSection, teacherId)
+};
+studentServices.createPayMent = async (amount, semester, studentId) => {
+    return await studentModels.createPayMent(amount, semester, studentId)
 };
 module.exports = studentServices;

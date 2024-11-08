@@ -166,24 +166,36 @@ authController.loginGoogle = async (req, res, next) => {
 authController.forgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
+
         if (!email) {
-            return createError(400, 'Email is require')
+            return next(createError(400, 'Email is required'));
         }
 
-        const user = await authServices.findEmployee(email)
-        if (!user) {
-            return createError(400, 'Email does not exist')
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return next(createError(400, 'Invalid email format'));
         }
 
-        const token = jwtServices.signResetToken({ employeeId: user.id });
+        const user = await authServices.findEmployee(email);
+        const student = await authServices.findStudent({ email: email });
+        const userType = user ? 'employee' : student ? 'student' : null;
+
+        if (!userType) {
+            return next(createError(400, 'Email does not exist'));
+        }
+
+        const tokenPayload = user ? { employeeId: user.id } : { studentId: student.id };
+        const token = jwtServices.signResetToken(tokenPayload);
         const expiryDate = new Date(Date.now() + 3600000); // 1 ชั่วโมง
 
-        await authServices.updateResetPassword(email, token, expiryDate)
+        await authServices.updateResetPassword(email, token, expiryDate);
 
-        await sendEmailServices.sendResetEmail(email, token, user.username);
+        const username = user ? user.username : student.username;
+        await sendEmailServices.sendResetEmail(email, token, username);
+
         res.status(200).json({ message: 'Password reset email sent.' });
     } catch (error) {
-        console.log('error from forgetPassword', error)
+        console.log('Error from forgetPassword:', error);
         next(error);
     }
 };
@@ -191,27 +203,39 @@ authController.resetPassword = async (req, res, next) => {
     const { token, newPassword } = req.body;
     try {
         if (!token) {
-            return createError(400, 'token is require')
+            return next(createError(400, 'Token is required'));
         }
         if (!newPassword) {
-            return createError(400, 'newPassword is require')
+            return next(createError(400, 'New password is required'));
         }
+
         const decoded = jwtServices.verify(token);
         console.log('Decoded token:', decoded);
 
-        const employee = await authServices.findEmployeeById(decoded.employeeId)
-        console.log('User found:', employee);
+        let user;
+        if (decoded.employeeId) {
+            user = await authServices.findEmployeeById(decoded.employeeId);
+        } else if (decoded.studentId) {
+            user = await authServices.findStudentById(decoded.studentId);
+        } else {
+            return next(createError(400, 'Invalid token payload'));
+        }
 
-        if (!employee || employee.resetPasswordToken !== token || new Date() > employee.resetPasswordExpires) {
-            return createError(400, 'Invalid or expired token')
+        if (!user || user.resetPasswordToken !== token || new Date() > user.resetPasswordExpires) {
+            return next(createError(400, 'Invalid or expired token'));
         }
 
         const hashedPassword = await hashServices.hash(newPassword);
-        await authServices.updatePassword(employee.id, hashedPassword);
+
+        if (decoded.employeeId) {
+            await authServices.updateEmployeePassword(user.id, hashedPassword);
+        } else if (decoded.studentId) {
+            await authServices.updateStudentPassword(user.id, hashedPassword);
+        }
 
         res.status(200).json({ message: 'Password has been reset successfully' });
     } catch (error) {
-        console.log('error from resetPassword', error);
+        console.log('Error from resetPassword:', error);
         next(error);
     }
 };
