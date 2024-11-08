@@ -13,5 +13,8 @@ studentRouter.post('/change-password', studentController.studentChangePassword)
 studentRouter.post('/request-change', studentController.sendRequestChange)
 studentRouter.post('/request-section', studentController.sendRequestSection)
 
+//payment
+studentRouter.get('/config', studentController.getConfig)
+studentRouter.post('/create-payment-intent',studentController.createPayment)
 
 module.exports = studentRouter;

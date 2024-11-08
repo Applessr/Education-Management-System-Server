@@ -37,7 +37,7 @@ studentModels.getCredit = async (studentId) => {
     const totalSelectionCredits = 24;
 
     const enrolledRequiredCredits = approvedEnrollments.reduce((total, enrollment) => {
-        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec => 
+        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec =>
             rec.course && rec.course.some(course => course.id === enrollment.course.id)
         )?.recommendationType;
 
@@ -48,7 +48,7 @@ studentModels.getCredit = async (studentId) => {
     }, 0);
 
     const enrolledElectiveCredits = approvedEnrollments.reduce((total, enrollment) => {
-        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec => 
+        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec =>
             rec.course && rec.course.some(course => course.id === enrollment.course.id)
         )?.recommendationType;
 
@@ -59,7 +59,7 @@ studentModels.getCredit = async (studentId) => {
     }, 0);
 
     const enrolledSelectionCredits = approvedEnrollments.reduce((total, enrollment) => {
-        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec => 
+        const recommendationType = enrollment.course.major.courseRecommendation?.find(rec =>
             rec.course && rec.course.some(course => course.id === enrollment.course.id)
         )?.recommendationType;
 
@@ -192,6 +192,18 @@ studentModels.sendRequestSection = async (userId, courseId, currentSection, newS
             newSection: newSection || null,
             teacherId: teacherId || null
         }
+    });
+};
+studentModels.createPayMent = async (amount, semester, studentId) => {
+    return await prisma.payment.create({
+        data: {
+            totalCredit: 3,
+            amount: amount,
+            semester: semester,
+            status: "PENDING",
+            studentId: studentId,
+            payDate: new Date(),
+        },
     });
 };
 

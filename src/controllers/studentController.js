@@ -1,6 +1,8 @@
 const hashServices = require("../services/hashServices");
 const studentServices = require("../services/studentServices");
 const createError = require("../utils/create-error");
+const stripe = require('stripe')(process.env.STRPIE_SECRET_KEY)
+
 
 
 const studentController = {};
@@ -149,6 +151,43 @@ studentController.sendRequestSection = async (req, res, next) => {
         next(error);
     };
 
+};
+studentController.getConfig = async (req, res, next) => {
+    try {
+        res.send({ publishableKey: process.env.STRPIE_PUBLISHABLE_KEY })
+    } catch (error) {
+        console.log('Error from sendRequestChange', error)
+        next(error);
+    };
+};
+studentController.createPayment = async (req, res, next) => {
+    try {
+        const studentId = req.user.id
+        const { amount, semester } = req.body;
+        if (!amount || amount <= 0) {
+            return createError(400, "Invalid amount");
+        }
+
+        if (!semester) {
+            return createError(400, 'Semester is require')
+        }
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(amount * 100), // Convert to smallest currency unit
+            currency: "thb", // Set your currency
+            metadata: {
+                studentId: req.user.id, // Assuming you have `req.user` for authenticated students
+                semester: semester,
+            },
+        });
+
+        const studentPayMent = await studentServices.createPayMent(amount, semester, studentId)
+
+        res.send({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+        console.log('Error from createPayment', error);
+        next(error);
+    }
 };
 
 
