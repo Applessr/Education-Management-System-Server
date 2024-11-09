@@ -15,6 +15,7 @@ studentRouter.post('/request-section', studentController.sendRequestSection)
 
 //payment
 studentRouter.get('/config', studentController.getConfig)
-studentRouter.post('/create-payment-intent',studentController.createPayment)
+studentRouter.get('/check-payment', studentController.checkPayment)
+studentRouter.post('/create-payment-intent', studentController.createPayment)
 
 module.exports = studentRouter;

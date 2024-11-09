@@ -160,37 +160,99 @@ studentController.getConfig = async (req, res, next) => {
         next(error);
     };
 };
+studentController.checkPayment = async (req, res, next) => {
+    try {
+        const studentId = req.user.id;
+        const { semester } = req.body;
+
+        if (!semester) {
+            return createError(400, 'Semester is required');
+        }
+
+        const existingPayment = await studentServices.checkPayMent(semester, studentId);
+
+        if (existingPayment) {
+            if (existingPayment.status === 'PENDING') {
+                return res.status(200).json({ message: 'Payment is pending for this semester. Please complete payment.' });
+            }
+            if (existingPayment.status === 'COMPLETED') {
+                return res.status(200).json({ message: 'Payment has already been completed for this semester.' });
+            }
+            if (existingPayment.status === 'FAILED') {
+                return res.status(400).json({ message: 'Payment failed for this semester. Please try again.' });
+            }
+        } else {
+            return res.status(404).json({ message: 'No payment found for this semester.' });
+        }
+    } catch (error) {
+        console.log('Error from checkoutPayment', error);
+        next(error);
+    }
+};
 studentController.createPayment = async (req, res, next) => {
     try {
-        const studentId = req.user.id
+        const studentId = req.user.id;
         const { amount, semester } = req.body;
+
         if (!amount || amount <= 0) {
             return createError(400, "Invalid amount");
         }
 
         if (!semester) {
-            return createError(400, 'Semester is require')
+            return createError(400, 'Semester is required');
+        }
+
+        const existingPayment = await studentServices.checkPayMent(semester, studentId);
+
+        if (existingPayment) {
+            if (existingPayment.status === 'PENDING') {
+                return res.status(200).json({ message: 'Payment is pending for this semester. Please complete payment.' });
+            }
+            if (existingPayment.status === 'COMPLETED') {
+                return res.status(200).json({ message: 'Payment has already been completed for this semester.' });
+            }
+            if (existingPayment.status === 'FAILED') {
+                return res.status(400).json({ message: 'Payment failed for this semester. Please try again.' });
+            }
         }
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(amount * 100), // Convert to smallest currency unit
-            currency: "thb", // Set your currency
+            amount: Math.round(amount * 100),  
+            currency: "thb",
             metadata: {
-                studentId: req.user.id, // Assuming you have `req.user` for authenticated students
+                studentId: studentId,
                 semester: semester,
             },
         });
 
-        const studentPayMent = await studentServices.createPayMent(amount, semester, studentId)
+        if (paymentIntent.status === "pending") {
+            const studentPayment = await studentServices.createPayMent(amount, semester, studentId, { status: 'PENDING' });
 
-        res.send({ clientSecret: paymentIntent.client_secret });
+            return res.json({
+                message: "Payment pending",
+                clientSecret: paymentIntent.client_secret,
+            });
+        }
+
+        if (paymentIntent.status === "succeeded") {
+            const studentPayment = await studentServices.createPayMent(amount, semester, studentId, { status: 'COMPLETED' });
+
+            return res.json({
+                message: "Payment successful",
+                studentPayment,
+                clientSecret: paymentIntent.client_secret,
+            });
+        } else {
+            return res.status(400).json({
+                message: "Payment failed",
+                clientSecret: paymentIntent.client_secret,
+            });
+        }
     } catch (error) {
         console.log('Error from createPayment', error);
         next(error);
     }
 };
-
-
 
 
 module.exports = studentController;

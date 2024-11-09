@@ -23,6 +23,9 @@ studentServices.sendRequestChange = async (userId, fieldToChange, newValue) => {
 studentServices.sendRequestSection = async (userId, courseId, currentSection, newSection, teacherId) => {
     return await studentModels.sendRequestSection(userId, courseId, currentSection, newSection, teacherId)
 };
+studentServices.checkPayMent = async (semester, studentId) => {
+    return await studentModels.checkPayMent(semester, studentId)
+};
 studentServices.createPayMent = async (amount, semester, studentId) => {
     return await studentModels.createPayMent(amount, semester, studentId)
 };

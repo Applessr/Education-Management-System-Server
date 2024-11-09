@@ -206,5 +206,13 @@ studentModels.createPayMent = async (amount, semester, studentId) => {
         },
     });
 };
+studentModels.checkPayMent = async (semester, studentId) => {
+    return await prisma.payment.findFirst({
+        where: {
+            studentId: studentId,
+            semester: semester,
+        },
+    });
+};
 
 module.exports = studentModels;
