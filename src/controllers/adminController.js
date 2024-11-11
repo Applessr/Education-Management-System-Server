@@ -14,10 +14,10 @@ adminController.registerEmployee = async (req, res, next) => {
             return createError(400, 'All field is require')
         }
 
-        const { employeeRole } = req.user
-        if (employeeRole !== "ADMIN") {
-            return createError(400, 'You do not have permission')
-        }
+        // const { employeeRole } = req.user
+        // if (employeeRole !== "ADMIN") {
+        //     return createError(400, 'You do not have permission')
+        // }
 
         const isEmailExist = await adminServices.getEmployeeEmail(email);
         if (isEmailExist) {

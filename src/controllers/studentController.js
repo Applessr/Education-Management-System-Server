@@ -152,6 +152,27 @@ studentController.sendRequestSection = async (req, res, next) => {
     };
 
 };
+studentController.checkPayment = async (req, res, next) => {
+    try {
+        const studentId = req.user.id;
+        const { semester } = req.query;
+
+        if (!semester) {
+            return createError(400, 'Semester is required');
+        }
+
+        const existingPayment = await studentServices.checkPayMent(semester, studentId);
+
+        if (existingPayment) {
+            return res.status(200).json(existingPayment);
+        }
+
+        return res.status(404).json({ message: 'No payment found for this semester' });
+    } catch (error) {
+        console.log('Error from checkPayment', error);
+        next(error);
+    }
+};
 studentController.getConfig = async (req, res, next) => {
     try {
         res.send({ publishableKey: process.env.STRPIE_PUBLISHABLE_KEY })
@@ -160,7 +181,7 @@ studentController.getConfig = async (req, res, next) => {
         next(error);
     };
 };
-studentController.createPayment = async (req, res, next) => {
+studentController.paymentIntent = async (req, res, next) => {
     try {
         const studentId = req.user.id
         const { amount, semester } = req.body;
@@ -173,17 +194,35 @@ studentController.createPayment = async (req, res, next) => {
         }
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(amount * 100), // Convert to smallest currency unit
-            currency: "thb", // Set your currency
+            amount: Math.round(amount * 100),
+            currency: "thb",
             metadata: {
-                studentId: req.user.id, // Assuming you have `req.user` for authenticated students
+                studentId: studentId,
                 semester: semester,
             },
         });
 
-        const studentPayMent = await studentServices.createPayMent(amount, semester, studentId)
-
         res.send({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+        console.log('Error from createPayment', error);
+        next(error);
+    }
+};
+studentController.createPayment = async (req, res, next) => {
+    try {
+        const studentId = req.user.id
+        const { amount, semester, status } = req.body;
+        if (!amount || amount <= 0) {
+            return createError(400, "Invalid amount");
+        }
+
+        if (!semester) {
+            return createError(400, 'Semester is require')
+        }
+
+        const studentPayMent = await studentServices.createPayMent(amount, semester, studentId, status)
+
+        res.status(201).json(studentPayMent);
     } catch (error) {
         console.log('Error from createPayment', error);
         next(error);

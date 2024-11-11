@@ -324,10 +324,10 @@ courseController.studentGetClassScheduleBySemester = async (req, res, next) => {
       return createError(400, "Check token expired date");
     }
 
-    const { semester } = req.body;
-    if (!semester) {
-      return createError(400, "semester is require");
-    }
+        const { semester } = req.query;
+        if (!semester) {
+            return createError(400, 'semester is require')
+        }
 
     const classSchedule =
       await courseServices.studentGetClassScheduleBySemester(
