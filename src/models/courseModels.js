@@ -512,7 +512,7 @@ courseModels.studentGetClassScheduleByCourseId = async (courseCode) => {
     return [];
   }
 
-  // Step 2: Find all class schedules for all courses with the same courseCode
+  // Step 2: Find all class schedules for all courses with the same courseCode, including teacher information
   const classSchedules = await prisma.classSchedule.findMany({
     where: {
       courseId: {
@@ -520,13 +520,22 @@ courseModels.studentGetClassScheduleByCourseId = async (courseCode) => {
       },
     },
     include: {
-      course: true, // Include the related course information in the response
+      course: {
+        include: {
+          teacher: {
+            where: {
+              employeeRole: "TEACHER", // Include only teachers with the role 'TEACHER'
+            },
+          },
+        },
+      },
     },
   });
 
   // Step 3: Flatten the course data and merge it with classSchedules
   const flattenedClassSchedules = classSchedules.map((schedule) => {
     const { course, ...scheduleData } = schedule; // Extract the course object and the rest of the schedule data
+    const teacher = course.teacher ? course.teacher : {}; // Check if a teacher exists, else provide an empty object
 
     // Return a new object that combines the course fields with the schedule data
     return {
@@ -540,6 +549,10 @@ courseModels.studentGetClassScheduleByCourseId = async (courseCode) => {
       teacherId: course.teacherId,
       courseSyllabusId: course.courseSyllabusId,
       majorId: course.majorId,
+      teacherFirstName: teacher.firstName, // Include teacher's details
+      teacherLastName: teacher.lastName,
+      teacherEmail: teacher.email,
+      teacherName: `${teacher.firstName} ${teacher.lastName}`,
     };
   });
 
