@@ -21,7 +21,7 @@ app.use('/student', authenticate, studentRouter)
 
 app.use('/teacher', authenticate, teacherRouter)
 
-app.use('/admin', authenticate, adminRouter)
+app.use('/admin', adminRouter)
 
 app.use('/course', courseRouter)
 

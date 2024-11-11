@@ -150,21 +150,44 @@ studentModels.getNotification = async (userId) => {
     });
 };
 studentModels.getExamDate = async (userId) => {
-    return await prisma.examSchedule.findMany({
+    const examSchedules = await prisma.examSchedule.findMany({
         where: {
             course: {
                 enrollments: {
                     some: {
-                        studentId: userId,
-                        status: 'APPROVED',
-                    },
-                },
-            },
+                        studentId: userId,  // Use dynamic userId instead of hardcoding 1
+                        status: "APPROVED"
+                    }
+                }
+            }
         },
         include: {
-            course: true,
-        },
+            course: {
+                include: {
+                    teacher: {   // Use `include` to include the teacher relation
+                        select: {
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
+                }
+            }
+        }
     });
+
+    const formattedExamSchedules = examSchedules.map((schedule) => {
+        const startTimeUTC = new Date(schedule.startTime).toISOString().slice(11, 19);
+        const endTimeUTC = new Date(schedule.endTime).toISOString().slice(11, 19);
+
+        return {
+            ...schedule,
+            startTime: startTimeUTC,
+            endTime: endTimeUTC,
+            teacher: `${schedule.course.teacher.firstName} ${schedule.course.teacher.lastName}` // Corrected access to teacher's name
+        };
+    });
+
+    return formattedExamSchedules;
 };
 studentModels.changePassword = async (userId, newPassword) => {
     return await prisma.student.update({
@@ -194,13 +217,13 @@ studentModels.sendRequestSection = async (userId, courseId, currentSection, newS
         }
     });
 };
-studentModels.createPayMent = async (amount, semester, studentId) => {
+studentModels.createPayMent = async (amount, semester, studentId, status) => {
     return await prisma.payment.create({
         data: {
             totalCredit: 3,
             amount: amount,
             semester: semester,
-            status: "PENDING",
+            status: status,
             studentId: studentId,
             payDate: new Date(),
         },

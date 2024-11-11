@@ -26,7 +26,7 @@ studentServices.sendRequestSection = async (userId, courseId, currentSection, ne
 studentServices.checkPayMent = async (semester, studentId) => {
     return await studentModels.checkPayMent(semester, studentId)
 };
-studentServices.createPayMent = async (amount, semester, studentId) => {
-    return await studentModels.createPayMent(amount, semester, studentId)
+studentServices.createPayMent = async (amount, semester, studentId, status) => {
+    return await studentModels.createPayMent(amount, semester, studentId, status)
 };
 module.exports = studentServices;

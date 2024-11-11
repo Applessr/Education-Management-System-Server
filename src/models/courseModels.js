@@ -171,7 +171,7 @@ courseModels.teacherGetCourse = async (teacherId) => {
             }
         }
     });
-    
+
     const groupByCourseCode = (courses) => {
         return courses.reduce((acc, course) => {
             const { courseCode } = course;
@@ -398,7 +398,7 @@ courseModels.studentGetEnrollCourseBySemester = async (studentId, semester) => {
     });
 };
 courseModels.studentGetClassScheduleBySemester = async (studentId, semester) => {
-    return await prisma.enrollment.findMany({
+    const enrollments = await prisma.enrollment.findMany({
         where: {
             studentId: studentId,
             semester: semester,
@@ -407,11 +407,43 @@ courseModels.studentGetClassScheduleBySemester = async (studentId, semester) => 
         include: {
             course: {
                 include: {
+                    teacher: {
+                        select: {
+                            email: true,
+                            firstName: true,
+                            lastName: true,
+                        }
+                    }, 
                     classSchedules: true,
                 },
             },
         },
     });
+
+    const formattedSchedules = enrollments.map((enrollment) => {
+        const formattedClassSchedules = enrollment.course.classSchedules.map((schedule) => {
+            const startTimeUTC = new Date(schedule.startTime).toISOString().slice(11, 19);
+            const endTimeUTC = new Date(schedule.endTime).toISOString().slice(11, 19);
+
+            return {
+                ...schedule,
+                startTime: startTimeUTC,
+                endTime: endTimeUTC,
+                teacherName: schedule.teacher ? `${schedule.teacher.firstName} ${schedule.teacher.lastName}` : '',  // เพิ่มชื่ออาจารย์
+            };
+        });
+
+        return {
+            ...enrollment,
+            course: {
+                ...enrollment.course,
+                classSchedules: formattedClassSchedules,
+                teacherName: enrollment.course.teacher ? `${enrollment.course.teacher.firstName} ${enrollment.course.teacher.lastName}` : '',  // เพิ่มชื่ออาจารย์ใน course
+            },
+        };
+    });
+
+    return formattedSchedules;
 };
 courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
     const prerequisites = await prisma.conditionCourse.findMany({
