@@ -1,35 +1,36 @@
-const express = require('express');
-const cors = require('cors');
-const notFoundHandler = require('./middlewares/not-found');
-const handlerError = require('./middlewares/error');
-const authRouter = require('./routes/authRoute');
-const adminRouter = require('./routes/adminRoute');
-const studentRouter = require('./routes/studentRoute');
-const teacherRouter = require('./routes/teacherRoute');
-const courseRouter = require('./routes/courseRoute');
-const gradeRouter = require('./routes/gradeRoute');
-const authenticate = require('./middlewares/authentication');
+const express = require("express");
+const cors = require("cors");
+const notFoundHandler = require("./middlewares/not-found");
+const handlerError = require("./middlewares/error");
+const authRouter = require("./routes/authRoute");
+const adminRouter = require("./routes/adminRoute");
+const studentRouter = require("./routes/studentRoute");
+const teacherRouter = require("./routes/teacherRoute");
+const courseRouter = require("./routes/courseRoute");
+const gradeRouter = require("./routes/gradeRoute");
+const authenticate = require("./middlewares/authentication");
+const morgan = require("morgan");
 
-const app = express()
-app.use(cors())
+const app = express();
+app.use(cors());
 
-app.use(express.json())
+app.use(morgan("dev"));
 
-app.use('/auth', authRouter)
+app.use(express.json());
 
-app.use('/student', authenticate, studentRouter)
+app.use("/auth", authRouter);
 
-app.use('/teacher', authenticate, teacherRouter)
+app.use("/student", authenticate, studentRouter);
 
-app.use('/admin', adminRouter)
+app.use("/teacher", authenticate, teacherRouter);
 
-app.use('/course', courseRouter)
+app.use("/admin", authenticate, adminRouter);
 
-app.use('/grade', authenticate, gradeRouter)
+app.use("/course", courseRouter);
 
+app.use("/grade", authenticate, gradeRouter);
 
-app.use('*', notFoundHandler);
+app.use("*", notFoundHandler);
 app.use(handlerError);
-
 
 module.exports = app;
