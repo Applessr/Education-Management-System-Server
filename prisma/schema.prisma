@@ -270,7 +270,7 @@ model ExamSchedule {
 }
 
 enum ExamType {
-  MIDTERMg
+  MIDTERM
   FINAL
 }
 

@@ -58,6 +58,15 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
                     room: true
                 }
             },
+            examSchedule: {
+                select: {
+                    // examType: true,
+                    examDate: true,
+                    startTime: true,
+                    endTime: true,
+                    room: true
+                }
+            },
             _count: {
                 select: {
                     enrollments: {
@@ -84,6 +93,8 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
         }
     });
 };
+
+
 courseModels.getCourseById = async (courseId) => {
     return await prisma.course.findMany({
         where: {
@@ -126,7 +137,11 @@ courseModels.getCourseById = async (courseId) => {
     });
 };
 courseModels.getAllMajor = async () => {
-    return await prisma.major.findMany({});
+    return await prisma.major.findMany({
+        include: {
+            faculty: true  // Make sure this is included
+        }
+    });
 };
 courseModels.getMajorByFaculty = async (facultyId) => {
     return await prisma.major.findMany({
@@ -152,7 +167,7 @@ courseModels.teacherGetCourse = async (teacherId) => {
                     room: true
                 }
             },
-            examSchedule: {
+            examSchedule: { 
                 select: {
                     examDate: true,
                     startTime: true,
