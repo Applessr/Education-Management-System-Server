@@ -57,18 +57,26 @@ studentController.getNotification = async (req, res, next) => {
 };
 studentController.getExamDate = async (req, res, next) => {
     try {
-        const userId = req.user.id
+        const userId = req.user.id;
         if (!userId) {
-            return createError(400, 'Check token expired date')
+            return res.status(400).json({ error: 'Check token expiration date' });
         }
-        const examDate = await studentServices.getExamDate(userId);
 
+        const semester = req.query.semester;
+        if (!semester) {
+            return res.status(400).json({ error: 'Semester is required' });
+        }
+        console.log(req.query.semester);
+
+        const examDate = await studentServices.getExamDate(userId, semester);
+        if (!examDate) {
+            return createError(404, 'No exam data found')
+        }
         res.status(200).json(examDate);
     } catch (error) {
-        console.log('Error from student getExamDate', error)
+        console.log('Error from student getExamDate', error);
         next(error);
     }
-
 };
 studentController.studentChangePassword = async (req, res, next) => {
     try {

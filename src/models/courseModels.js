@@ -419,10 +419,7 @@ courseModels.studentGetEnrollCourseBySemester = async (studentId, semester) => {
         },
     });
 };
-courseModels.studentGetClassScheduleBySemester = async (
-    studentId,
-    semester
-) => {
+courseModels.studentGetClassScheduleBySemester = async (studentId, semester) => {
     return await prisma.enrollment.findMany({
         where: {
             studentId: studentId,
@@ -433,6 +430,12 @@ courseModels.studentGetClassScheduleBySemester = async (
             course: {
                 include: {
                     classSchedules: true,
+                    teacher: {
+                        select: {
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
                 },
             },
         },
@@ -534,7 +537,6 @@ courseModels.studentGetClassScheduleByCourseId = async (courseCode) => {
         },
     });
 
-    // Step 3: Flatten the course data and merge it with classSchedules
     const flattenedClassSchedules = classSchedules.map((schedule) => {
         const { course, ...scheduleData } = schedule; // Extract the course object and the rest of the schedule data
         const teacher = course.teacher ? course.teacher : {}; // Check if a teacher exists, else provide an empty object

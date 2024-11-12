@@ -15,7 +15,7 @@ studentModels.getCredit = async (studentId) => {
                         include: {
                             courseRecommendation: {
                                 include: {
-                                    course: true,  // ดึงข้อมูล course มาด้วย
+                                    course: true,
                                 },
                             },
                         },
@@ -149,14 +149,15 @@ studentModels.getNotification = async (userId) => {
         }
     });
 };
-studentModels.getExamDate = async (userId) => {
+studentModels.getExamDate = async (userId, semester) => {
     const examSchedules = await prisma.examSchedule.findMany({
         where: {
             course: {
                 enrollments: {
                     some: {
-                        studentId: userId,  // Use dynamic userId instead of hardcoding 1
-                        status: "APPROVED"
+                        studentId: userId,
+                        status: "APPROVED",
+                        semester: semester,
                     }
                 }
             }
