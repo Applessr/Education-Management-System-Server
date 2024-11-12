@@ -245,6 +245,9 @@ teacherModels.getEnrollRequest = async (teacherId) => {
             courseName: true,
             section: true,
             enrollments: {
+                where: {
+                    status: 'PENDING'
+                },
                 select: {
                     id: true,
                     status: true,
@@ -252,11 +255,22 @@ teacherModels.getEnrollRequest = async (teacherId) => {
                     semester: true,
                     student: {
                         select: {
+                            id: true,
                             studentId: true,
                             email: true,
                             firstName: true,
                             lastName: true,
-                            phone: true
+                            phone: true,
+                            major: {
+                                select: {
+                                    name: true,
+                                    faculty: {
+                                        select: {
+                                            name: true
+                                        }
+                                    }
+                                }
+                            }
                         },
                     },
                 },
