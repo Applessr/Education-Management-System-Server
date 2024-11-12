@@ -35,7 +35,9 @@ courseServices.createCourse = async (
   section,
   teacherId,
   courseSyllabusId,
-  majorId
+  majorId,
+  classSchedules,
+  examSchedule
 ) => {
   return await courseModels.createCourse(
     courseCode,
@@ -45,7 +47,9 @@ courseServices.createCourse = async (
     section,
     teacherId,
     courseSyllabusId,
-    majorId
+    majorId,
+    classSchedules,
+    examSchedule
   );
 };
 courseServices.editCourse = async (courseId, updateCourseInfo) => {
@@ -90,6 +94,10 @@ courseServices.studentCancelEnroll = async (enrollmentId) => {
 
 courseServices.studentGetClassScheduleByCourseId = async (courseCode) => {
   return await courseModels.studentGetClassScheduleByCourseId(courseCode);
+};
+
+courseServices.assignToSyllabus = async (courseId, majorId, year, recommendationType) => {
+    return await courseModels.assignToSyllabus(courseId, majorId, year, recommendationType);
 };
 
 module.exports = courseServices;
