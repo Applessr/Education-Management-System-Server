@@ -229,6 +229,7 @@ teacherController.editEnrollStatus = async (req, res, next) => {
         if (!enrollmentId) {
             return createError(400, 'enrollmentId is require')
         }
+        console.log('enrollmentId :>> ', enrollmentId);
 
         const { status } = req.body
         if (!status) {
@@ -261,7 +262,7 @@ teacherController.editRequestSection = async (req, res, next) => {
             return createError('update status is require')
         }
 
-        const updateStatus = await teacherServices.editRequestSection(requestId, status)
+        const updateStatus = await teacherServices.editEnrollStatus(requestId, status)
         res.status(200).json(updateStatus);
     } catch (error) {
         console.log('Error from sendAnnounce', error)
