@@ -34,6 +34,12 @@ courseRouter.patch(
   courseController.activeCourse
 );
 
+courseRouter.post(
+  "/employee/assign-syllabus",
+  authenticate,
+  courseController.assignToSyllabus
+);
+
 //student
 courseRouter.get(
   "/student/course-syllabus",
