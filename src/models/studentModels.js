@@ -115,7 +115,7 @@ studentModels.getNotification = async (userId) => {
             studentId: Number(userId),
             status: 'APPROVED'
         },
-        select: {
+        include: {
             course: {
                 select: {
                     courseCode: true,
@@ -142,12 +142,17 @@ studentModels.getNotification = async (userId) => {
                             title: true,
                             content: true,
                             createdAt: true
+                        },
+                        orderBy: {
+                            createdAt: 'desc'
                         }
                     }
                 }
             }
         }
-    });
+    }).then(enrollments =>
+        enrollments.filter(enrollment => enrollment.course.announcements.length > 0)
+    );
 };
 studentModels.getExamDate = async (userId, semester) => {
     const examSchedules = await prisma.examSchedule.findMany({
