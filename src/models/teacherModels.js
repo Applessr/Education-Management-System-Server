@@ -76,6 +76,81 @@ teacherModels.getStudentInCourse = async (teacherId) => {
         },
     });
 };
+// teacherModels.getStudentInCourseById = async (teacherId, courseId) => {
+//     return await prisma.course.findUnique({
+//         where: {
+//             id: Number(courseId),
+//         },
+//         select: {
+//             id: true,
+//             courseCode: true,
+//             courseName: true,
+//             section: true,
+//             teacher: { 
+//                 where: 
+//                 { id: Number(teacherId) }, 
+//                 select: {
+//                     firstName: true,
+//                     lastName: true
+//                 }
+//             },
+//             classSchedules: {
+//                 select: {
+//                     day: true,
+//                     startTime: true,
+//                     endTime: true,
+//                     room: true,
+//                 },
+//             },
+//             enrollments: {
+//                 where: {
+//                     status: "APPROVED",
+//                 },
+//                 select: {
+//                     student: {
+//                         select: {
+//                             id: true, 
+//                             studentId: true,
+//                             email: true,
+//                             firstName: true,
+//                             lastName: true,
+//                             phone: true,
+//                             grades: {
+//                                 where: {
+//                                     courseId: Number(courseId)  // Filter grades for this specific course
+//                                 },
+//                                 select: {
+//                                     id: true,
+//                                     totalPoint: true,
+//                                     letterGrade: true,
+//                                     semester: true,
+//                                     components: {  // Include grade components
+//                                         select: {
+//                                             id: true,
+//                                             type: true,
+//                                             point: true
+//                                         }
+//                                     }
+//                                 },
+//                             },
+//                             major: {
+//                                 select: {
+//                                     name: true,
+//                                     faculty: {
+//                                         select: {
+//                                             name: true,
+//                                         },
+//                                     },
+//                                 },
+//                             },
+//                         },
+//                     },
+//                 },
+//             },
+//         },
+//     });
+// };
+
 teacherModels.getStudentInCourseById = async (teacherId, courseId) => {
     return await prisma.course.findUnique({
         where: {
@@ -86,10 +161,8 @@ teacherModels.getStudentInCourseById = async (teacherId, courseId) => {
             courseCode: true,
             courseName: true,
             section: true,
-            teacher: {
-                where: {
-                    id: Number(teacherId),
-                },
+            teacher: { 
+                where: { id: Number(teacherId) }, 
                 select: {
                     firstName: true,
                     lastName: true
@@ -110,14 +183,29 @@ teacherModels.getStudentInCourseById = async (teacherId, courseId) => {
                 select: {
                     student: {
                         select: {
+                            id: true, 
                             studentId: true,
                             email: true,
                             firstName: true,
                             lastName: true,
                             phone: true,
                             grades: {
+                                where: {
+                                    courseId: Number(courseId),
+                                    // Add semester filter if needed
+                                },
                                 select: {
+                                    id: true,
                                     totalPoint: true,
+                                    letterGrade: true,
+                                    semester: true,
+                                    components: {
+                                        select: {
+                                            id: true,
+                                            type: true,
+                                            point: true
+                                        }
+                                    }
                                 },
                             },
                             major: {
@@ -137,6 +225,7 @@ teacherModels.getStudentInCourseById = async (teacherId, courseId) => {
         },
     });
 };
+
 teacherModels.getConsultedStudent = async (teacherId) => {
     const students = await prisma.employee.findMany({
         where: {
