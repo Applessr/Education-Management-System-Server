@@ -173,15 +173,19 @@ authController.forgetPassword = async (req, res, next) => {
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            return next(createError(400, 'Invalid email format'));
+            return createError(400, 'Invalid email format');
         }
 
         const user = await authServices.findEmployee(email);
         const student = await authServices.findStudent({ email: email });
         const userType = user ? 'employee' : student ? 'student' : null;
 
+        if(!user || !student) {
+            return createError(400,'Email does not exist')
+        }
+
         if (!userType) {
-            return next(createError(400, 'Email does not exist'));
+            return createError(400, 'Email does not exist');
         }
 
         const tokenPayload = user ? { employeeId: user.id } : { studentId: student.id };
@@ -193,7 +197,7 @@ authController.forgetPassword = async (req, res, next) => {
         const username = user ? user.username : student.username;
         await sendEmailServices.sendResetEmail(email, token, username);
 
-        res.status(200).json({ message: 'Password reset email sent.' });
+        res.status(200).json({ message: 'Reset password email sent' });
     } catch (error) {
         console.log('Error from forgetPassword:', error);
         next(error);
@@ -203,10 +207,10 @@ authController.resetPassword = async (req, res, next) => {
     const { token, newPassword } = req.body;
     try {
         if (!token) {
-            return next(createError(400, 'Token is required'));
+            return createError(400, 'Token is required');
         }
         if (!newPassword) {
-            return next(createError(400, 'New password is required'));
+            return createError(400, 'New password is required');
         }
 
         const decoded = jwtServices.verify(token);
@@ -218,11 +222,11 @@ authController.resetPassword = async (req, res, next) => {
         } else if (decoded.studentId) {
             user = await authServices.findStudentById(decoded.studentId);
         } else {
-            return next(createError(400, 'Invalid token payload'));
+            return createError(400, 'Invalid token payload');
         }
 
         if (!user || user.resetPasswordToken !== token || new Date() > user.resetPasswordExpires) {
-            return next(createError(400, 'Invalid or expired token'));
+            return createError(400, 'Invalid or expired token');
         }
 
         const hashedPassword = await hashServices.hash(newPassword);

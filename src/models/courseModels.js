@@ -63,6 +63,16 @@ courseModels.getAllCourse = async (searchTerm, semester) => {
           room: true,
         },
       },
+      examSchedule: {
+        // This is wrong - examSchedule shouldn't be inside classSchedules
+        select: {
+          examType: true,
+          examDate: true,
+          startTime: true,
+          endTime: true,
+          room: true,
+        },
+      },
       _count: {
         select: {
           enrollments: {
@@ -201,10 +211,34 @@ courseModels.findCourseByCode = async (courseCode, section) => {
   return await prisma.course.findFirst({
     where: {
       courseCode,
-      section,
+      section: parseInt(section),
     },
   });
 };
+// courseModels.createCourse = async (
+//     courseCode,
+//     courseName,
+//     credits,
+//     seat,
+//     section,
+//     teacherId,
+//     courseSyllabusId,
+//     majorId
+// ) => {
+//     return await prisma.course.create({
+//         data: {
+//             courseCode,
+//             courseName,
+//             credits,
+//             seat,
+//             section,
+//             teacherId,
+//             courseSyllabusId,
+//             majorId,
+//         },
+//     });
+// };
+
 courseModels.createCourse = async (
   courseCode,
   courseName,
@@ -213,38 +247,202 @@ courseModels.createCourse = async (
   section,
   teacherId,
   courseSyllabusId,
-  majorId
+  majorId,
+  classSchedules,
+  examSchedule
 ) => {
   return await prisma.course.create({
     data: {
       courseCode,
       courseName,
-      credits,
-      seat,
-      section,
-      teacherId,
-      courseSyllabusId,
-      majorId,
+      credits: parseInt(credits),
+      seat: parseInt(seat),
+      section: parseInt(section),
+      teacherId: parseInt(teacherId),
+      courseSyllabusId: courseSyllabusId
+        ? parseInt(courseSyllabusId)
+        : undefined,
+      majorId: parseInt(majorId),
+      classSchedules: {
+        create: classSchedules.map((schedule) => ({
+          day: parseInt(schedule.day),
+          startTime: new Date(`1970-01-01T${schedule.startTime}`),
+          endTime: new Date(`1970-01-01T${schedule.endTime}`),
+          room: schedule.room,
+        })),
+      },
+      examSchedule: {
+        create: examSchedule.map((exam) => ({
+          examType: exam.examType,
+          examDate: new Date(exam.examDate),
+          startTime: new Date(`1970-01-01T${exam.startTime}`),
+          endTime: new Date(`1970-01-01T${exam.endTime}`),
+          room: exam.room,
+        })),
+      },
+    },
+    include: {
+      teacher: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+      major: {
+        select: {
+          name: true,
+          faculty: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      classSchedules: true,
+      examSchedule: true,
+      _count: {
+        select: {
+          enrollments: true,
+        },
+      },
     },
   });
 };
 courseModels.editCourse = async (courseId, updateCourseInfo) => {
-  return await prisma.course.update({
+  // 1. Update the main course information
+  const updatedCourse = await prisma.course.update({
     where: {
       id: Number(courseId),
     },
     data: {
       courseCode: updateCourseInfo.courseCode,
       courseName: updateCourseInfo.courseName,
-      credits: updateCourseInfo.credits,
-      seat: updateCourseInfo.seat,
-      section: updateCourseInfo.section,
-      teacherId: updateCourseInfo.teacherId,
-      courseSyllabusId: updateCourseInfo.courseSyllabusId,
+      credits: updateCourseInfo.credits
+        ? parseInt(updateCourseInfo.credits)
+        : undefined,
+      seat: updateCourseInfo.seat ? parseInt(updateCourseInfo.seat) : undefined,
+      section: updateCourseInfo.section
+        ? parseInt(updateCourseInfo.section)
+        : undefined,
+      teacherId: updateCourseInfo.teacherId
+        ? parseInt(updateCourseInfo.teacherId)
+        : undefined,
+      majorId: updateCourseInfo.majorId
+        ? parseInt(updateCourseInfo.majorId)
+        : undefined,
+    },
+    include: {
+      teacher: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+      major: {
+        select: {
+          name: true,
+          faculty: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      classSchedules: true,
+      examSchedule: true,
+      _count: {
+        select: {
+          enrollments: true,
+        },
+      },
+    },
+  });
+
+  // 2. If class schedules are provided, update them
+  if (updateCourseInfo.classSchedules) {
+    // First delete existing schedules
+    await prisma.classSchedule.deleteMany({
+      where: {
+        courseId: Number(courseId),
+      },
+    });
+
+    // Then create new ones
+    for (const schedule of updateCourseInfo.classSchedules) {
+      await prisma.classSchedule.create({
+        data: {
+          courseId: Number(courseId),
+          day: parseInt(schedule.day),
+          startTime: new Date(`1970-01-01T${schedule.startTime}`),
+          endTime: new Date(`1970-01-01T${schedule.endTime}`),
+          room: schedule.room,
+        },
+      });
+    }
+  }
+
+  // 3. If exam schedules are provided, update them
+  if (updateCourseInfo.examSchedule) {
+    // First delete existing exam schedules
+    await prisma.examSchedule.deleteMany({
+      where: {
+        courseId: Number(courseId),
+      },
+    });
+
+    // Then create new ones
+    for (const exam of updateCourseInfo.examSchedule) {
+      await prisma.examSchedule.create({
+        data: {
+          courseId: Number(courseId),
+          examType: exam.examType,
+          examDate: new Date(exam.examDate),
+          startTime: new Date(`1970-01-01T${exam.startTime}`),
+          endTime: new Date(`1970-01-01T${exam.endTime}`),
+          room: exam.room,
+        },
+      });
+    }
+  }
+
+  // 4. Get and return the final updated course
+  return await prisma.course.findUnique({
+    where: {
+      id: Number(courseId),
+    },
+    include: {
+      teacher: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+        },
+      },
+      major: {
+        select: {
+          name: true,
+          faculty: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      classSchedules: true,
+      examSchedule: true,
+      _count: {
+        select: {
+          enrollments: true,
+        },
+      },
     },
   });
 };
-
 courseModels.inactiveCourse = async (courseId) => {
   return await prisma.course.update({
     where: {
@@ -431,6 +629,12 @@ courseModels.studentGetClassScheduleBySemester = async (
       course: {
         include: {
           classSchedules: true,
+          teacher: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       },
     },
@@ -448,8 +652,6 @@ courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
       },
     },
   });
-
-  console.log("Test", prerequisites);
 
   if (prerequisites.length > 0) {
     const prerequisiteCourseIds = prerequisites.map(
@@ -475,8 +677,6 @@ courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
         letterGrade: true,
       },
     });
-
-    console.log("Grade", completedPrerequisites);
 
     const hasCompletedPrerequisites = completedPrerequisites.every(
       (grade) => grade.letterGrade !== "F"
@@ -513,21 +713,47 @@ courseModels.studentCancelEnroll = async (enrollmentId) => {
 };
 
 courseModels.studentGetClassScheduleByCourseId = async (courseCode) => {
-  // Step 1: Find the course and include related ClassSchedule and Teacher
+  // Step 1: Find all courses with the given courseCode
   const courses = await prisma.course.findMany({
     where: {
-      courseCode: courseCode, // Find courses with the specified courseCode
-    },
-    include: {
-      classSchedules: true, // Include all class schedules for the course
-      teacher: true, // Include teacher information
+      courseCode: courseCode, // Find all courses with the same courseCode
     },
   });
 
-  // Step 2: Map the result to the desired format
-  const formattedCourses = courses.flatMap((course) =>
-    course.classSchedules.map((classSchedule) => ({
-      courseId: course.id,
+  // If no courses found, return an empty array or handle accordingly
+  if (courses.length === 0) {
+    console.log("No courses found with that courseCode");
+    return [];
+  }
+
+  // Step 2: Find all class schedules for all courses with the same courseCode, including teacher information
+  const classSchedules = await prisma.classSchedule.findMany({
+    where: {
+      courseId: {
+        in: courses.map((course) => course.id), // Get class schedules for all matching courseIds
+      },
+    },
+    include: {
+      course: {
+        include: {
+          teacher: {
+            where: {
+              employeeRole: "TEACHER", // Include only teachers with the role 'TEACHER'
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Step 3: Flatten the course data and merge it with classSchedules
+  const flattenedClassSchedules = classSchedules.map((schedule) => {
+    const { course, ...scheduleData } = schedule; // Extract the course object and the rest of the schedule data
+    const teacher = course.teacher ? course.teacher : {}; // Check if a teacher exists, else provide an empty object
+
+    // Return a new object that combines the course fields with the schedule data
+    return {
+      ...scheduleData, // Keep the class schedule data
       courseCode: course.courseCode,
       courseName: course.courseName,
       credits: course.credits,
@@ -537,20 +763,68 @@ courseModels.studentGetClassScheduleByCourseId = async (courseCode) => {
       teacherId: course.teacherId,
       courseSyllabusId: course.courseSyllabusId,
       majorId: course.majorId,
-      teacherFirstName: course.teacher?.firstName || null,
-      teacherLastName: course.teacher?.lastName || null,
-      teacherEmail: course.teacher?.email || null,
-      teacherName: course.teacher
-        ? `${course.teacher.firstName} ${course.teacher.lastName}`
-        : null,
-      day: classSchedule.day,
-      startTime: classSchedule.startTime,
-      endTime: classSchedule.endTime,
-      room: classSchedule.room,
-    }))
-  );
+      teacherFirstName: teacher.firstName, // Include teacher's details
+      teacherLastName: teacher.lastName,
+      teacherEmail: teacher.email,
+      teacherName: `${teacher.firstName} ${teacher.lastName}`,
+    };
+  });
 
-  return formattedCourses;
+  return flattenedClassSchedules;
+};
+
+courseModels.assignToSyllabus = async (
+  courseId,
+  majorId,
+  year,
+  recommendationType
+) => {
+  // First, check if a CourseSyllabus exists for this major and year
+  let courseSyllabus = await prisma.courseSyllabus.findFirst({
+    where: {
+      majorId: parseInt(majorId),
+      year: year,
+      recommendationType: recommendationType,
+    },
+  });
+
+  // If no syllabus exists, create one
+  if (!courseSyllabus) {
+    courseSyllabus = await prisma.courseSyllabus.create({
+      data: {
+        majorId: parseInt(majorId),
+        year: year,
+        recommendationType: recommendationType,
+      },
+    });
+  }
+
+  // Update the course to be part of this syllabus
+  const updatedCourse = await prisma.course.update({
+    where: {
+      id: parseInt(courseId),
+    },
+    data: {
+      courseSyllabusId: courseSyllabus.id,
+    },
+  });
+
+  return {
+    message: "Course successfully assigned to syllabus",
+    course: updatedCourse,
+    syllabus: courseSyllabus,
+  };
+};
+
+courseModels.studentCancelEnroll = async (enrollmentId) => {
+  return await prisma.enrollment.update({
+    where: {
+      id: Number(enrollmentId),
+    },
+    data: {
+      status: "CANCELLED",
+    },
+  });
 };
 
 module.exports = courseModels;

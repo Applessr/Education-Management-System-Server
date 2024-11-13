@@ -1,4 +1,5 @@
 const prisma = require("../configs/prisma");
+const createError = require("../utils/create-error");
 const gradeModels = require("./gradeModels");
 
 const teacherModels = {};
@@ -245,6 +246,9 @@ teacherModels.getEnrollRequest = async (teacherId) => {
             courseName: true,
             section: true,
             enrollments: {
+                where: {
+                    status: 'PENDING'
+                },
                 select: {
                     id: true,
                     status: true,
@@ -252,11 +256,22 @@ teacherModels.getEnrollRequest = async (teacherId) => {
                     semester: true,
                     student: {
                         select: {
+                            id: true,
                             studentId: true,
                             email: true,
                             firstName: true,
                             lastName: true,
-                            phone: true
+                            phone: true,
+                            major: {
+                                select: {
+                                    name: true,
+                                    faculty: {
+                                        select: {
+                                            name: true
+                                        }
+                                    }
+                                }
+                            }
                         },
                     },
                 },
@@ -335,12 +350,25 @@ teacherModels.sendRequestChange = async (teacherId, fieldToChange, newValue) => 
     });
 };
 teacherModels.sendAnnounce = async (teacherId, title, content, courseId) => {
-    return prisma.announcement.create({
+    const announcement = await prisma.announcement.create({
         data: {
             teacherId: Number(teacherId),
             title,
             content,
-            courseId: Number(courseId)
+            courseId: courseId,
+        },
+    });
+
+    if (!announcement) {
+        throw createError(400, 'Failed to create announcement');
+    }
+
+    return announcement;
+};
+teacherModels.checkAnnouncementSent = async (courseId) => {
+    return await prisma.announcement.findMany({
+        where: {
+            courseId: courseId
         }
     });
 };
@@ -361,6 +389,17 @@ teacherModels.editRequestSection = async (requestId, status) => {
         },
         data: {
             status,
+        },
+    });
+};
+teacherModels.findEnroll = async (enrollmentId) => {
+    return await prisma.enrollment.findUnique({
+        where: {
+            id: Number(enrollmentId),
+        },
+        include: {
+            course: true,
+            student: true,
         },
     });
 };

@@ -204,12 +204,12 @@ teacherController.sendAnnounce = async (req, res, next) => {
             return createError(400, 'Check token expired date')
         }
 
-        const { title, content, courseId } = req.body
-        if (!(title && content && courseId)) {
+        const { title, content, studentId } = req.body
+        if (!(title && content && studentId)) {
             return createError('All field is require')
         }
 
-        const announce = await teacherServices.sendAnnounce(teacherId, title, content, courseId)
+        const announce = await teacherServices.sendAnnounce(teacherId, title, content, studentId)
         res.status(201).json(announce);
     } catch (error) {
         console.log('Error from sendAnnounce', error)
@@ -219,29 +219,42 @@ teacherController.sendAnnounce = async (req, res, next) => {
 };
 teacherController.editEnrollStatus = async (req, res, next) => {
     try {
-
-        const { employeeRole } = req.user
+        const { employeeRole } = req.user;
         if (employeeRole !== "TEACHER") {
-            return createError(400, 'You do not have permission')
+            return createError(400, 'You do not have permission');
         }
 
-        const { enrollmentId } = req.params
+        const { enrollmentId } = req.params;
         if (!enrollmentId) {
-            return createError(400, 'enrollmentId is require')
+            return createError(400, 'enrollmentId is required');
         }
 
-        const { status } = req.body
-        if (!status) {
-            return createError('update status is require')
+        const { status, courseId, courseName } = req.body;
+        if (!status && !courseId && !courseName) {
+            return createError(400, 'all fields is required');
+        }
+        console.log('status, courseId, courseName :>> ', status, courseId, courseName);
+
+        const existingAnnouncement = await teacherServices.checkAnnouncementSent(courseId);
+        if (status === 'APPROVED' && !existingAnnouncement) {
+            const announcement = await teacherServices.sendAnnounce(
+                req.user.id,
+                `Your enrollment in the course ${courseName} has been approved`,
+                `Congratulations! Your enrollment in the course ${courseName} has been approved.`,
+                courseId
+            );
+            if (!announcement) {
+                return createError(400, 'Failed to send announcement');
+            }
         }
 
-        const updateStatus = await teacherServices.editEnrollStatus(enrollmentId, status)
+        const updateStatus = await teacherServices.editEnrollStatus(enrollmentId, status);
+
         res.status(200).json(updateStatus);
     } catch (error) {
-        console.log('Error from sendAnnounce', error)
+        console.log('Error from sendAnnounce', error);
         next(error);
     }
-
 };
 teacherController.editRequestSection = async (req, res, next) => {
     try {
@@ -261,7 +274,7 @@ teacherController.editRequestSection = async (req, res, next) => {
             return createError('update status is require')
         }
 
-        const updateStatus = await teacherServices.editRequestSection(requestId, status)
+        const updateStatus = await teacherServices.editEnrollStatus(requestId, status)
         res.status(200).json(updateStatus);
     } catch (error) {
         console.log('Error from sendAnnounce', error)

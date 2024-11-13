@@ -11,8 +11,8 @@ studentServices.getStudentProfile = async (userId) => {
 studentServices.getNotification = async (userId) => {
     return await studentModels.getNotification(userId)
 };
-studentServices.getExamDate = async (userId) => {
-    return await studentModels.getExamDate(userId)
+studentServices.getExamDate = async (userId, semester) => {
+    return await studentModels.getExamDate(userId,semester)
 };
 studentServices.changePassword = async (userId, newPassword) => {
     return await studentModels.changePassword(userId, newPassword)
