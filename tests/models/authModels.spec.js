@@ -14,6 +14,7 @@ jest.mock("../../src/configs/prisma", () => {
     };
 });
 
+
 describe("authModels", () => {
     afterEach(() => {
         jest.clearAllMocks();
@@ -23,7 +24,7 @@ describe("authModels", () => {
         const email = "test@example.com";
         const mockEmployee = { id: 1, email: "test@example.com", firstName: "John", lastName: "Doe" };
 
-        prisma.employee.findUnique.mockResolvedValue(mockEmployee); 
+        prisma.employee.findUnique.mockResolvedValue(mockEmployee);
 
         const employee = await authModels.findEmployee(email);
         expect(employee).toEqual(mockEmployee);
@@ -120,21 +121,27 @@ describe("authModels", () => {
         });
     });
 
-    it("updatePassword should update employee's password", async () => {
-        const employeeId = 1;
-        const hashedPassword = "hashedPassword123";
-        const mockUpdatedEmployee = { id: 1, email: "test@example.com", password: hashedPassword };
+    it("updateResetPassword should update employee's reset password token", async () => {
+        const email = "test@example.com";
+        const token = "reset-token-123";
+        const expiryDate = new Date(Date.now() + 3600000);
+        const mockUpdatedEmployee = {
+            id: 1,
+            email: "test@example.com",
+            resetPasswordToken: token,
+            resetPasswordExpires: expiryDate,
+        };
 
         prisma.employee.update.mockResolvedValue(mockUpdatedEmployee);
 
-        const employee = await authModels.updatePassword(employeeId, hashedPassword);
+        const employee = await authModels.updateResetPassword(email, token, expiryDate);
+
         expect(employee).toEqual(mockUpdatedEmployee);
         expect(prisma.employee.update).toHaveBeenCalledWith({
-            where: { id: employeeId },
+            where: { email: email },
             data: {
-                password: hashedPassword,
-                resetPasswordToken: null,
-                resetPasswordExpires: null,
+                resetPasswordToken: token,
+                resetPasswordExpires: expiryDate,
             },
         });
     });

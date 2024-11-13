@@ -621,6 +621,12 @@ courseModels.editCourse = async (courseId, updateCourseInfo) => {
                 course: {
                     include: {
                         classSchedules: true,
+                        teacher: {
+                            select: {
+                                firstName: true,
+                                lastName: true
+                            }
+                        }
                     },
                 },
             },

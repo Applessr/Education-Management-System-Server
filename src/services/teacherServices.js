@@ -35,6 +35,9 @@ teacherServices.editEnrollStatus = async (enrollmentId, status) => {
 teacherServices.editRequestSection = async (requestId, status) => {
     return await teacherModels.editRequestSection(requestId, status)
 };
+teacherServices.findEnroll = async (enrollmentId) => {
+    return await teacherModels.findEnroll(enrollmentId)
+};
 teacherServices.editStudentSection = async (enrollmentId, courseId) => {
     return await teacherModels.editStudentSection(enrollmentId, courseId)
 };
