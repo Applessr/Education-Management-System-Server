@@ -32,6 +32,7 @@ gradeModels.studentGetGrade = async (studentId) => {
             };
         }
         acc[grade.semester].courses.push({
+            courseId: grade.course.id,
             courseCode: grade.course.courseCode,
             courseName: grade.course.courseName,
             section: grade.course.section,
