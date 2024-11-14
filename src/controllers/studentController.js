@@ -47,6 +47,9 @@ studentController.getNotification = async (req, res, next) => {
             return createError(400, 'Check token expired date')
         }
         const notification = await studentServices.getNotification(userId);
+        if(!notification) {
+            return createError(404, 'No notification found')
+        }
 
         res.status(200).json(notification);
     } catch (error) {
@@ -110,7 +113,9 @@ studentController.studentChangePassword = async (req, res, next) => {
 
         let changePassword = await hashServices.hash(newPassword);
 
-        const updatedUser = await studentServices.changePassword(userId, { password: changePassword });
+        console.log('changePassword :>> ', changePassword);
+
+        const updatedUser = await studentServices.changePassword(userId, changePassword);
         delete updatedUser.password;
 
         res.status(200).json({ message: 'password change successfully' });

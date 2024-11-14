@@ -66,12 +66,13 @@ describe("studentController", () => {
         expect(studentServices.getStudentProfile).toHaveBeenCalledWith(mockUserId);
     });
 
-    test("GET /student/notifications - should get notifications", async () => {
-        const mockNotifications = [{ id: 1, message: "New notification" }];
+    it("GET /student/notifications - should get notifications", async () => {
+        const mockNotifications = [{ id: 1, title: "New notification", content: 'new' }];
+
         studentServices.getNotification.mockResolvedValue(mockNotifications);
 
         const response = await request(app)
-            .get("/student/notifications")
+            .get("/student/notification")
             .set("Authorization", `Bearer ${mockToken}`);
 
         expect(response.status).toBe(200);
@@ -94,21 +95,21 @@ describe("studentController", () => {
 
     test("POST /student/change-password - should change student password", async () => {
         const mockProfile = { id: mockUserId, password: "hashedPassword" };
-        studentServices.getStudentProfile.mockResolvedValue(mockProfile);
-        hashServices.compare.mockResolvedValue(true);
+        studentServices.getStudentProfile.mockResolvedValue(mockProfile); 
+        hashServices.compare.mockResolvedValue(true); 
         hashServices.hash.mockResolvedValue("newHashedPassword");
-
+    
         const response = await request(app)
             .post("/student/change-password")
             .send({
                 currentPassword: "oldPassword",
-                newPassword: "newPassword",
-                confirmPassword: "newPassword",
+                newPassword: "newPassword",     
+                confirmPassword: "newPassword", 
             })
             .set("Authorization", `Bearer ${mockToken}`);
-
+    
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({ message: "password change successfully" });
+        expect(response.body).toEqual({ message: "Password changed successfully" });
         expect(studentServices.changePassword).toHaveBeenCalledWith(mockUserId, { password: "newHashedPassword" });
     });
 
