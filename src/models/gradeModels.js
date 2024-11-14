@@ -67,35 +67,92 @@ gradeModels.studentGetGradeBySemester = async (studentId, semester) => {
   });
 };
 
+// gradeModels.studentGetScore = async (studentId, courseId) => {
+//     return await prisma.grade.findMany({
+//         where: {
+//             studentId: Number(studentId),
+//             courseId: Number(courseId)
+//         },
+//         select: {
+//             id: true,
+//             totalPoint: true,
+//             letterGrade: true,
+//             credit: true,
+//             course: {
+//                 select: {
+//                     id: true,
+//                     courseCode: true,
+//                     courseName: true,
+//                     section: true
+//                 }
+//             },
+//             components: {
+//                 select: {
+//                     id: true,
+//                     type: true,
+//                     point: true,
+//                 }
+//             }
+//         }
+//     });
+// };
+
+// In gradeModels.js
 gradeModels.studentGetScore = async (studentId, courseId) => {
-  return await prisma.grade.findMany({
-    where: {
-      studentId: Number(studentId),
-      courseId: Number(courseId),
-    },
-    select: {
-      id: true,
-      totalPoint: true,
-      letterGrade: true,
-      credit: true,
-      course: {
-        select: {
-          id: true,
-          courseCode: true,
-          courseName: true,
-          section: true,
+    const latestGrade = await prisma.grade.findFirst({
+        where: {
+            studentId: Number(studentId),
+            courseId: Number(courseId)
         },
-      },
-      components: {
-        select: {
-          id: true,
-          type: true,
-          point: true,
+        orderBy: {
+            semester: 'desc'  // Get most recent semester first
         },
-      },
-    },
-  });
+        select: {
+            semester: true
+        }
+    });
+
+    if (!latestGrade) {
+        return [];
+    }
+    // Now fetch complete grade data for that semester
+    const result = await prisma.grade.findMany({
+        where: {
+            studentId: Number(studentId),
+            courseId: Number(courseId),
+            semester: latestGrade.semester
+        },
+        select: {
+            id: true,
+            totalPoint: true,
+            letterGrade: true,
+            credit: true,
+            semester: true,
+            components: {
+                select: {
+                    id: true,
+                    type: true,
+                    point: true,
+                },
+                orderBy: {
+                    id: 'desc'
+                }
+            },
+            course: {
+                select: {
+                    id: true,
+                    courseCode: true,
+                    courseName: true,
+                    section: true
+                }
+            }
+        }
+    });
+    
+    return result;
 };
+
+
 gradeModels.studentGetAllGPA = async (studentId) => {
   const semesters = await prisma.enrollment.findMany({
     where: {
@@ -297,31 +354,44 @@ gradeModels.studentGetGPABySemester = async (studentId) => {
 
   return result;
 };
-gradeModels.teacherAddScore = async (
-  studentId,
-  courseId,
-  semester,
-  type,
-  point
-) => {
-  const gradeId = await gradeModels.findOrCreateGrade(
-    studentId,
-    courseId,
-    semester
-  );
+// gradeModels.teacherAddScore = async (studentId, courseId, semester, type, point) => {
+//     const gradeId = await gradeModels.findOrCreateGrade(studentId, courseId, semester);
 
-  await prisma.gradeComponent.create({
-    data: {
-      type: type,
-      point: point,
-      gradeId: gradeId,
-    },
-  });
+
+//     await prisma.gradeComponent.create({
+//         data: {
+//             type: type,
+//             point: point,
+//             gradeId: gradeId,
+//         },
+//     });
+
+//     const updatedTotal = await gradeModels.updateTotalScore(gradeId);
+
+//     return updatedTotal;
+// };
+gradeModels.teacherAddScore = async (studentId, courseId, semester, type, point) => {
+    const gradeId = await gradeModels.findOrCreateGrade(studentId, courseId, semester);
+
+    const newComponent = await prisma.gradeComponent.create({
+        data: {
+            type: type,
+            point: point,
+            gradeId: gradeId,
+        },
+        include: {
+            grade: true
+        }
+    });
 
   const updatedTotal = await gradeModels.updateTotalScore(gradeId);
 
-  return updatedTotal;
+    return {
+        component: newComponent,
+        totalScore: updatedTotal
+    };
 };
+
 gradeModels.teacherEditScore = async (componentId, updatedData) => {
   const gradeComponent = await prisma.gradeComponent.findUnique({
     where: { id: Number(componentId) },
@@ -346,6 +416,30 @@ gradeModels.teacherEditScore = async (componentId, updatedData) => {
   return updatedTotal;
 };
 
+// gradeModels.findOrCreateGrade = async (studentId, courseId, semester) => {
+//     let grade = await prisma.grade.findFirst({
+//         where: {
+//             studentId: Number(studentId),
+//             courseId: Number(courseId),
+//             semester: semester,
+//         },
+//     });
+
+//     if (!grade) {
+//         grade = await prisma.grade.create({
+//             data: {
+//                 studentId: Number(studentId),
+//                 courseId: Number(courseId),
+//                 semester: semester,
+//                 totalPoint: 0,
+//                 credit: 3
+//             },
+//         });
+//     }
+
+//     return grade.id;
+// };
+
 gradeModels.findOrCreateGrade = async (studentId, courseId, semester) => {
   let grade = await prisma.grade.findFirst({
     where: {
@@ -355,21 +449,26 @@ gradeModels.findOrCreateGrade = async (studentId, courseId, semester) => {
     },
   });
 
-  if (!grade) {
-    grade = await prisma.grade.create({
-      data: {
-        studentId: Number(studentId),
-        courseId: Number(courseId),
-        semester: semester,
-        totalPoint: 0,
-        credit: 3,
-      },
-    });
-  }
+    if (!grade) {
+        // Get the course credits
+        const course = await prisma.course.findUnique({
+            where: { id: Number(courseId) },
+            select: { credits: true }
+        });
+
+        grade = await prisma.grade.create({
+            data: {
+                studentId: Number(studentId),
+                courseId: Number(courseId),
+                semester: semester,
+                totalPoint: 0,
+                credit: course.credits, // Use actual course credits
+            },
+        });
+    }
 
   return grade.id;
 };
-
 const calculateLetterGrade = (totalScore) => {
   if (totalScore >= 80) return "A";
   if (totalScore >= 75) return "B+";

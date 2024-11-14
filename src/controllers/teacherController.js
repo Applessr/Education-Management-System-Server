@@ -113,6 +113,7 @@ teacherController.getStudentInCourseById = async (req, res, next) => {
         next(error);
     }
 };
+
 teacherController.getConsultedStudent = async (req, res, next) => {
     try {
         const { employeeRole } = req.user
