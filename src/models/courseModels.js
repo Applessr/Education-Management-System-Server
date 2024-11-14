@@ -644,39 +644,31 @@ courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
   const prerequisites = await prisma.conditionCourse.findMany({
     where: { courseId },
     select: {
-      course: {
-        select: {
-          id: true,
-          courseCode: true,
-        },
-      },
+      prerequisiteCourseCode: true,
     },
   });
 
-  if (prerequisites.length > 0) {
-    const prerequisiteCourseIds = prerequisites.map(
-      (prerequisite) => prerequisite.course.id
-    );
+  console.log("object", prerequisites[0].prerequisiteCourseCode);
 
-    const condition = await prisma.conditionCourse.findMany({
-      where: {
-        courseId: { in: prerequisiteCourseIds },
-      },
-      select: {
-        prerequisiteCourseCode: true,
-      },
-    });
-    console.log("condition", condition.prerequisiteCourseCode);
-    console.log("prerequisiteCourseIds", prerequisiteCourseIds);
+  if (prerequisites.length > 0) {
+    const prerequisitesId = await prisma.course.findMany({
+      where:{
+        courseCode: {
+          in: prerequisites.map((prerequisite) => prerequisite.prerequisiteCourseCode),
+        },
+      }
+    })
+
+    console.log(prerequisitesId,"Hello");
     const completedPrerequisites = await prisma.grade.findMany({
       where: {
         studentId: Number(studentId),
-        courseId: { in: condition.prerequisiteCourseCode },
+        courseId: {in:prerequisitesId.map((prerequisite) => prerequisite.id)},
       },
-      select: {
-        letterGrade: true,
-      },
+      
     });
+
+    console.log("completedPrerequisites", completedPrerequisites);
 
     const hasCompletedPrerequisites = completedPrerequisites.every(
       (grade) => grade.letterGrade !== "F"
