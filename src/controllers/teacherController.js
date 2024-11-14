@@ -233,9 +233,9 @@ teacherController.editEnrollStatus = async (req, res, next) => {
         if (!status && !courseId && !courseName) {
             return createError(400, 'all fields is required');
         }
-        console.log('status, courseId, courseName :>> ', status, courseId, courseName);
 
         const existingAnnouncement = await teacherServices.checkAnnouncementSent(courseId);
+        console.log('existingAnnouncement:', existingAnnouncement);
         if (status === 'APPROVED' && !existingAnnouncement) {
             const announcement = await teacherServices.sendAnnounce(
                 req.user.id,
@@ -243,6 +243,7 @@ teacherController.editEnrollStatus = async (req, res, next) => {
                 `Congratulations! Your enrollment in the course ${courseName} has been approved.`,
                 courseId
             );
+            console.log('Announcement created:', announcement);
             if (!announcement) {
                 return createError(400, 'Failed to send announcement');
             }
