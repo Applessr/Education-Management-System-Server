@@ -109,6 +109,7 @@ authController.loginGoogle = async (req, res, next) => {
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
+        
 
         const payloadFromGoogle = ticket.getPayload();
         const googleId = payloadFromGoogle['sub'];
@@ -135,7 +136,7 @@ authController.loginGoogle = async (req, res, next) => {
                 });
             }
         } else {
-            employee = await authServices.updateUser(employee.id, {
+            employee = await authServices.updateEmployee(employee.id, {
                 firstName,
                 lastName
             });
@@ -160,7 +161,7 @@ authController.loginGoogle = async (req, res, next) => {
 
     } catch (error) {
         console.error('Error verifying token:', error);
-        res.status(401).send('Invalid token');
+        res.status(401).json({ message: 'Invalid token' });
     }
 };
 authController.forgetPassword = async (req, res, next) => {
@@ -180,8 +181,8 @@ authController.forgetPassword = async (req, res, next) => {
         const student = await authServices.findStudent({ email: email });
         const userType = user ? 'employee' : student ? 'student' : null;
 
-        if(!user || !student) {
-            return createError(400,'Email does not exist')
+        if(!user && !student) {
+            return next(createError(400, 'Email does not exist'));
         }
 
         if (!userType) {

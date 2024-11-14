@@ -56,7 +56,7 @@ describe('Auth Router Integration Tests', () => {
             .get('/auth/current-user')
             .set('Authorization', `Bearer ${validEmployeeToken}`);
 
-        console.log(response.body); 
+        console.log(response.body);
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty('email', employeeData.email);
     });

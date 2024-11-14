@@ -29,6 +29,9 @@ teacherServices.sendRequestChange = async (teacherId, fieldToChange, newValue) =
 teacherServices.sendAnnounce = async (teacherId, title, content, courseId) => {
     return await teacherModels.sendAnnounce(teacherId, title, content, courseId)
 };
+teacherServices.checkAnnouncementSent = async (courseId) => {
+    return await teacherModels.checkAnnouncementSent(courseId)
+};
 teacherServices.editEnrollStatus = async (enrollmentId, status) => {
     return await teacherModels.editEnrollStatus(enrollmentId, status)
 };

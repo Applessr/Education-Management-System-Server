@@ -15,13 +15,10 @@ authServices.findStudentById = async (studentId) => {
     return await authModels.findStudentById(studentId)
 };
 authServices.findEmployeeGoogleId = async (googleId) => {
-    return await authModels.findEmployee(googleId)
+    return await authModels.findGoogleId(googleId)
 };
 authServices.createEmployee = async (data) => {
     return await authModels.CreateEmployee(data)
-};
-authServices.findUserByGoogleId = async (googleId) => {
-    return await authModels.findEmployee(googleId)
 };
 authServices.updateEmployee = async (id, data) => {
     return await authModels.updateEmployee(id, data)

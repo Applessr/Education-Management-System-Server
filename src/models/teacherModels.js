@@ -455,11 +455,10 @@ teacherModels.sendAnnounce = async (teacherId, title, content, courseId) => {
     return announcement;
 };
 teacherModels.checkAnnouncementSent = async (courseId) => {
-    return await prisma.announcement.findMany({
-        where: {
-            courseId: courseId
-        }
+    const announcements = await prisma.announcement.findMany({
+        where: { courseId: Number(courseId) },
     });
+    return announcements.length > 0;
 };
 teacherModels.editEnrollStatus = async (enrollmentId, status) => {
     return await prisma.enrollment.update({
