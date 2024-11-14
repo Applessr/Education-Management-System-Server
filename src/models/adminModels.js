@@ -114,7 +114,7 @@ adminModels.overAll = async () => {
         maleStudent,
         femaleStudent,
         facultyTeacherCount,
-        facultyStudentCount  // Add this to the return object
+        facultyStudentCount  
     };
 };
 adminModels.courseSyllabus = async (majorId, year) => {
