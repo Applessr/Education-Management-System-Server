@@ -181,7 +181,7 @@ describe('gradeModels', () => {
 
             const result = await gradeModels.teacherAddScore(studentId, courseId, semester, type, point);
 
-            expect(result).toBe(25);
+            expect(result.totalScore).toBe(25);
 
             expect(gradeModels.findOrCreateGrade).toHaveBeenCalledWith(studentId, courseId, semester);
             expect(prisma.gradeComponent.create).toHaveBeenCalledWith({
@@ -189,6 +189,9 @@ describe('gradeModels', () => {
                     type: type,
                     point: point,
                     gradeId: 1,
+                },
+                include: {
+                    grade: true,
                 },
             });
             expect(gradeModels.updateTotalScore).toHaveBeenCalledWith(1);

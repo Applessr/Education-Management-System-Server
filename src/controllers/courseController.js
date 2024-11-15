@@ -74,6 +74,9 @@ courseController.getCourseById = async (req, res, next) => {
         const { courseId } = req.params;
 
         const course = await courseServices.getCourseById(courseId);
+        if(!course) {
+            return createError(404, 'this course does not exist')
+        }
 
         res.status(200).json(course);
     } catch (error) {

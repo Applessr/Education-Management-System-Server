@@ -199,7 +199,7 @@ studentModels.changePassword = async (userId, newPassword) => {
     return await prisma.student.update({
         where: { id: userId },
         data: {
-            password: newPassword.password,
+            password: newPassword,
         },
     });
 };

@@ -22,7 +22,7 @@ describe('Auth Router Integration Tests', () => {
         validStudentToken = jwtServices.sign({ id: studentData.id, type: 'STUDENT' });
     });
 
-    test('POST /auth/login-employee should return 401 for invalid password', async () => {
+    test('POST /auth/login-employee should return 400 for invalid password', async () => {
         const response = await request(app)
             .post('/auth/login-employee')
             .send({ email: employeeData.email, password: 'wrongPassword' });

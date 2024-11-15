@@ -117,7 +117,7 @@ authController.loginGoogle = async (req, res, next) => {
         const firstName = payloadFromGoogle['given_name'];
         const lastName = payloadFromGoogle['family_name'];
 
-        let employee = await authServices.findUserByGoogleId(googleId);
+        let employee = await authServices.findEmployeeGoogleId(googleId);
 
         if (!employee) {
             const existingEmployee = await authServices.findEmployee(email);
@@ -195,7 +195,7 @@ authController.forgetPassword = async (req, res, next) => {
 
         await authServices.updateResetPassword(email, token, expiryDate);
 
-        const username = user ? user.username : student.username;
+        const username = user ? user.firstName : student.firstName;
         await sendEmailServices.sendResetEmail(email, token, username);
 
         res.status(200).json({ message: 'Reset password email sent' });

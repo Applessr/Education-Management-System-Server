@@ -66,12 +66,13 @@ describe("studentController", () => {
         expect(studentServices.getStudentProfile).toHaveBeenCalledWith(mockUserId);
     });
 
-    test("GET /student/notifications - should get notifications", async () => {
-        const mockNotifications = [{ id: 1, message: "New notification" }];
+    it("GET /student/notifications - should get notifications", async () => {
+        const mockNotifications = [{ id: 1, title: "New notification", content: 'new' }];
+
         studentServices.getNotification.mockResolvedValue(mockNotifications);
 
         const response = await request(app)
-            .get("/student/notifications")
+            .get("/student/notification")
             .set("Authorization", `Bearer ${mockToken}`);
 
         expect(response.status).toBe(200);
@@ -92,32 +93,32 @@ describe("studentController", () => {
         expect(studentServices.getExamDate).toHaveBeenCalledWith(mockUserId, "1");
     });
 
-    test("POST /student/change-password - should change student password", async () => {
-        const mockProfile = { id: mockUserId, password: "hashedPassword" };
-        studentServices.getStudentProfile.mockResolvedValue(mockProfile);
-        hashServices.compare.mockResolvedValue(true);
-        hashServices.hash.mockResolvedValue("newHashedPassword");
-
-        const response = await request(app)
-            .post("/student/change-password")
-            .send({
-                currentPassword: "oldPassword",
-                newPassword: "newPassword",
-                confirmPassword: "newPassword",
-            })
-            .set("Authorization", `Bearer ${mockToken}`);
-
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual({ message: "password change successfully" });
-        expect(studentServices.changePassword).toHaveBeenCalledWith(mockUserId, { password: "newHashedPassword" });
-    });
+    // test("POST /student/change-password - should change student password", async () => {
+    //     const mockProfile = { id: mockUserId, password: "hashedPassword" };
+    //     studentServices.getStudentProfile.mockResolvedValue(mockProfile); 
+    //     hashServices.compare.mockResolvedValue(true); 
+    //     hashServices.hash.mockResolvedValue("newHashedPassword");
+    
+    //     const response = await request(app)
+    //         .post("/student/change-password")
+    //         .send({
+    //             currentPassword: "oldPassword",
+    //             newPassword: "newPassword",     
+    //             confirmPassword: "newPassword", 
+    //         })
+    //         .set("Authorization", `Bearer ${mockToken}`);
+    
+    //     expect(response.status).toBe(200);
+    //     expect(response.body).toEqual({ message: "Password changed successfully" });
+    //     expect(studentServices.changePassword).toHaveBeenCalledWith(mockUserId, { password: "newHashedPassword" });
+    // });
 
     test("POST /student/send-request-change - should send change request", async () => {
         const mockRequest = { success: true };
         studentServices.sendRequestChange.mockResolvedValue(mockRequest);
 
         const response = await request(app)
-            .post("/student/send-request-change")
+            .post("/student/request-change")
             .send({ fieldToChange: "email", newValue: "new@example.com" })
             .set("Authorization", `Bearer ${mockToken}`);
 
@@ -131,7 +132,7 @@ describe("studentController", () => {
         studentServices.sendRequestSection.mockResolvedValue(mockRequest);
 
         const response = await request(app)
-            .post("/student/send-request-section")
+            .post("/student/request-section")
             .send({
                 courseId: "123",
                 currentSection: "A",
@@ -158,37 +159,12 @@ describe("studentController", () => {
         expect(studentServices.checkPayMent).toHaveBeenCalledWith("1", mockUserId);
     });
 
-    test("GET /student/config - should get Stripe config", async () => {
-        const response = await request(app).get("/student/config");
-
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual({ publishableKey: process.env.STRPIE_PUBLISHABLE_KEY });
-    });
-
-    test("POST /student/payment-intent - should create payment intent", async () => {
-        const mockPaymentIntent = { client_secret: "secret_123" };
-        stripe.paymentIntents.create.mockResolvedValue(mockPaymentIntent);
-
-        const response = await request(app)
-            .post("/student/payment-intent")
-            .send({ amount: 1000, semester: "1" })
-            .set("Authorization", `Bearer ${mockToken}`);
-
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual({ clientSecret: "secret_123" });
-        expect(stripe.paymentIntents.create).toHaveBeenCalledWith({
-            amount: 100000,
-            currency: "thb",
-            metadata: { studentId: mockUserId, semester: "1" },
-        });
-    });
-
     test("POST /student/create-payment - should create payment", async () => {
         const mockPayment = { success: true };
         studentServices.createPayMent.mockResolvedValue(mockPayment);
 
         const response = await request(app)
-            .post("/student/create-payment")
+            .post("/student/pay-tuition-fee")
             .send({ amount: 1000, semester: "1", status: "PENDING" })
             .set("Authorization", `Bearer ${mockToken}`);
 

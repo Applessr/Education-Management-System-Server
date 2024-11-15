@@ -2,6 +2,7 @@ const prisma = require("../configs/prisma");
 const createError = require("../utils/create-error");
 
 const courseModels = {};
+
 courseModels.getAllCourse = async (searchTerm, semester) => {
   const isNumericSearchTerm = !isNaN(parseInt(searchTerm));
   const query = searchTerm
