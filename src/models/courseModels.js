@@ -649,8 +649,6 @@ courseModels.studentCreateEnroll = async (studentId, semester, courseId) => {
     },
   });
 
-  console.log("object", prerequisites[0].prerequisiteCourseCode);
-
   if (prerequisites.length > 0) {
     const prerequisitesId = await prisma.course.findMany({
       where:{
