@@ -207,7 +207,7 @@ teacherController.sendAnnounce = async (req, res, next) => {
 
         const { title, content, studentId } = req.body
         if (!(title && content && studentId)) {
-            return createError('All field is require')
+            return createError(400,'All field is require')
         }
 
         const announce = await teacherServices.sendAnnounce(teacherId, title, content, studentId)

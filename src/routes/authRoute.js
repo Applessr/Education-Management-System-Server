@@ -8,16 +8,9 @@ const authenticate = require("../middlewares/authentication");
 
 const authRouter = express.Router();
 
-authRouter.post(
-  "/login-employee",
-  loginEmployeeValidator,
-  authController.loginEmployee
-);
-authRouter.post(
-  "/login-student",
-  loginStudentValidator,
-  authController.loginStudent
-);
+authRouter.post("/login-employee", loginEmployeeValidator, authController.loginEmployee);
+
+authRouter.post("/login-student", loginStudentValidator, authController.loginStudent);
 
 authRouter.post("/login-google", authController.loginGoogle);
 

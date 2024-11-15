@@ -48,13 +48,13 @@ Pierre University`,
 };
 
 
-sendEmailServices.sendResetEmail = async (email, token, username) => {
+sendEmailServices.sendResetEmail = async (email, token, name) => {
     const resetLink = `http://localhost:5173/authentication/reset-password?token=${token}`;
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
         subject: 'Reset Your Password for PierreUT',
-        text: `Hello ${username},
+        text: `Hello ${name},
 
 We received a request to reset your password for your account on PierreUT. Please click the link below to create a new password:
 

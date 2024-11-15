@@ -13,71 +13,23 @@ courseRouter.get("/all-faculty", courseController.getAllFaculty);
 
 //employee
 courseRouter.get("/teacher", authenticate, courseController.teacherGetCourse);
-courseRouter.post(
-  "/employee/create-course",
-  authenticate,
-  courseController.createCourse
-);
-courseRouter.patch(
-  "/employee/edit-course/:courseId",
-  authenticate,
-  courseController.editCourse
-);
-courseRouter.patch(
-  "/employee/inactive-course/:courseId",
-  authenticate,
-  courseController.inactiveCourse
-);
-courseRouter.patch(
-  "/employee/active-course/:courseId",
-  authenticate,
-  courseController.activeCourse
-);
+courseRouter.post("/employee/create-course", authenticate, courseController.createCourse);
+courseRouter.patch("/employee/edit-course/:courseId", authenticate, courseController.editCourse);
+courseRouter.patch("/employee/inactive-course/:courseId", authenticate, courseController.inactiveCourse);
+courseRouter.patch("/employee/active-course/:courseId", authenticate, courseController.activeCourse);
 
-courseRouter.post(
-  "/employee/assign-syllabus",
-  authenticate,
-  courseController.assignToSyllabus
-);
+courseRouter.post("/employee/assign-syllabus", authenticate, courseController.assignToSyllabus);
 
 //student
-courseRouter.get(
-  "/student/course-syllabus",
-  authenticate,
-  courseController.studentGetCourseSyllabus
-);
-courseRouter.get(
-  "/student/enroll-course",
-  authenticate,
-  courseController.studentGetEnrollCourse
-);
-courseRouter.post(
-  "/student/enroll-course-semester",
-  authenticate,
-  courseController.studentGetEnrollCourseBySemester
-);
-courseRouter.get(
-  "/student/class-schedule",
-  authenticate,
-  courseController.studentGetClassScheduleBySemester
-);
+courseRouter.get("/student/course-syllabus", authenticate, courseController.studentGetCourseSyllabus);
+courseRouter.get("/student/enroll-course", authenticate, courseController.studentGetEnrollCourse);
+courseRouter.get("/student/class-schedule", authenticate, courseController.studentGetClassScheduleBySemester);
+courseRouter.post("/student/enroll-course-semester", authenticate, courseController.studentGetEnrollCourseBySemester);
 
-courseRouter.post(
-  "/student/enroll-course",
-  authenticate,
-  courseController.studentCreateEnroll
-);
+courseRouter.post("/student/enroll-course", authenticate, courseController.studentCreateEnroll);
 
-courseRouter.patch(
-  "/student/cancel-course/:enrollmentId",
-  authenticate,
-  courseController.studentCancelEnroll
-);
+courseRouter.patch("/student/cancel-course/:enrollmentId", authenticate, courseController.studentCancelEnroll);
 
-courseRouter.get(
-  "/student/class-schedule-by-id/:courseCode",
-  authenticate,
-  courseController.studentGetClassScheduleByCourseId
-);
+courseRouter.get("/student/class-schedule-by-id/:courseCode", authenticate, courseController.studentGetClassScheduleByCourseId);
 
 module.exports = courseRouter;

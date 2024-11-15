@@ -113,7 +113,6 @@ studentController.studentChangePassword = async (req, res, next) => {
 
         let changePassword = await hashServices.hash(newPassword);
 
-        console.log('changePassword :>> ', changePassword);
 
         const updatedUser = await studentServices.changePassword(userId, changePassword);
         delete updatedUser.password;

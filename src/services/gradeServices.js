@@ -20,20 +20,8 @@ gradeServices.studentGetAllGPA = async (studentId) => {
 gradeServices.studentGetGPABySemester = async (studentId) => {
   return await gradeModels.studentGetGPABySemester(studentId);
 };
-gradeServices.teacherAddScore = async (
-  studentId,
-  courseId,
-  semester,
-  type,
-  point
-) => {
-  return await gradeModels.teacherAddScore(
-    studentId,
-    courseId,
-    semester,
-    type,
-    point
-  );
+gradeServices.teacherAddScore = async (studentId, courseId, semester, type, point) => {
+  return await gradeModels.teacherAddScore(studentId, courseId, semester, type, point);
 };
 gradeServices.teacherEditScore = async (componentId, updatedData) => {
   return await gradeModels.teacherEditScore(componentId, updatedData);

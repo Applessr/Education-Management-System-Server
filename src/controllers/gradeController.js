@@ -68,10 +68,7 @@ gradeController.studentGetScore = async (req, res, next) => {
       return createError(400, "courseId is require");
     }
 
-    const studentScore = await gradeServices.studentGetScore(
-      studentId,
-      courseId
-    );
+    const studentScore = await gradeServices.studentGetScore(studentId,courseId);
 
     res.status(200).json(studentScore);
   } catch (error) {

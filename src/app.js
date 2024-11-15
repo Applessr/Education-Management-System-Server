@@ -10,6 +10,8 @@ const courseRouter = require("./routes/courseRoute");
 const gradeRouter = require("./routes/gradeRoute");
 const authenticate = require("./middlewares/authentication");
 const morgan = require("morgan");
+const limiter = require("./middlewares/limiter");
+const { swaggerUi, specs } = require("./configs/swagger");
 
 const app = express();
 app.use(cors());
@@ -18,13 +20,15 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
 app.use("/auth", authRouter);
 
-app.use("/student", authenticate, studentRouter);
+app.use("/student",limiter.studentLimiter, authenticate, studentRouter);
 
-app.use("/teacher", authenticate, teacherRouter);
+app.use("/teacher",limiter.employeeLimiter, authenticate, teacherRouter);
 
-app.use("/admin", authenticate, adminRouter);
+app.use("/admin",limiter.employeeLimiter, authenticate, adminRouter);
 
 app.use("/course", courseRouter);
 
