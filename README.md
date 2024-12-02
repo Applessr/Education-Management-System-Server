@@ -19,6 +19,10 @@ STRPIE_PUBLISHABLE_KEY
 STRPIE_SECRET_KEY
 
 ---
+# ER DIAGRAM
+![alt text](https://i.imgur.com/jc1jFHZ.png) 
+
+---
 
 ## Project Description
 
