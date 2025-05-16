@@ -26,7 +26,7 @@ STRPIE_SECRET_KEY
 
 ## Project Description
 
-The **Banking System** is designed to facilitate secure account management, transaction processing, and financial operations. The system allows users to register and log in, manage their accounts, perform transactions (e.g., deposits, withdrawals, transfers), and view transaction history. Admins can manage user accounts, verify transactions, and handle reports. The system ensures secure and scalable operations, using industry-standard technologies to protect user data and transactions.
+The university registration system is designed to facilitate student, instructor, and administrator interactions. It enables students to register for courses, view schedules, check grades, and monitor payment status. Instructors can manage course content, grade students, and communicate important updates. Administrators handle student and faculty data, course offerings, schedules, and payment verification. The system ensures secure, reliable, and scalable operations, supporting the future growth of users while providing an intuitive interface for all stakeholders.
 
 ## Features
 
